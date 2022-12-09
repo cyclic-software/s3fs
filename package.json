@@ -1,0 +1,37 @@
+{
+  "name": "s3fs",
+  "version": "0.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "aws",
+    "s3",
+    "fs",
+    "s3fs",
+    "cyclic.sh",
+    "@cyclic.sh"
+  ],
+  "engines": {
+    "node": ">=14.20.0"
+  },
+  "author": {
+    "name": "Cyclic Software",
+    "url": "https://www.cyclic.sh"
+  },
+  "contributors": [
+    "Mike Korostelev (https://github.com/korostelevm)",
+    "Kam Lasater (https://github.com/seekayel)"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.3.1"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ]
+  }
+}
