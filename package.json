@@ -1,7 +1,8 @@
 {
   "name": "@cyclic.sh/s3fs",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Drop in replacement for Node.js fs library backed by AWS s3.",
+  "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
