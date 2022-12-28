@@ -37,35 +37,6 @@ class CyclicS3FS {
   }
 
 
-  
-
-//   readFileSync(fileName) {
-//     const {error: subprocessError, stdout, stderr} = childProcess.spawnSync(
-//       `node`, [`${path.resolve(__dirname,'./readFileSync.js')}`, this.bucket, fileName], {
-// 			maxBuffer: HUNDRED_MEGABYTES,
-// 			env: {
-// 				...process.env,
-// 			},
-// 		});
-// ``
-//     // console.log({
-//     //   stdout: stdout?.toString(),
-//     //   stderr: stderr?.toString(),
-//     // })
-
-//     let error = stderr?.toString()
-//     if(error){
-//       throw error
-//     }
-    
-
-//     let result = stdout?.toString()
-//     if(result){
-//       const r = v8.deserialize(Buffer.from(result,'hex'));
-//       return r
-//     }
-// }
-
 
 }
 
