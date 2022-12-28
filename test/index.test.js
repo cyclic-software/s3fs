@@ -24,6 +24,7 @@ describe("Basic smoke tests", () => {
     expect(s3fs).toBeDefined()
   })
   test("readFile()", async () => {
+
     const fs = new s3fs(BUCKET)
     const d = await fs.readFile('test/_read.json')
     const s = d.toString("utf8")
@@ -33,8 +34,20 @@ describe("Basic smoke tests", () => {
 
 
   test("readFileSync()", async () => {
-    const fs = new s3fs(BUCKET)
     const d = fs.readFileSync('test/_read.json')
-    expect(JSON.parse(d)).toEqual({key: 'value'})
+    
+    const _fs = new s3fs(BUCKET)
+    const _d = _fs.readFileSync('test/_read.json')
+
+    expect(JSON.parse(d)).toEqual(JSON.parse(_d))
+  })
+
+  test("writeFileSync()", async () => {
+    const d = fs.readFileSync('test/_read.json')
+
+    const _fs = new s3fs(BUCKET)
+    const _d = _fs.readFileSync('test/_read.json')
+
+    expect(JSON.parse(d)).toEqual(JSON.parse(_d))
   })
 })
