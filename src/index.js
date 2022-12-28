@@ -14,12 +14,6 @@ function streamToBuffer(stream) {
   });
 }
 
-async function sleep(ms) {
-  await new Promise((resolve) => setTimeout(resolve, ms))
-  console.log('sleep')
-  return 'done sleep'
-}
-
 class CyclicS3FS {
   constructor(bucketName) {
     console.log(`new CyclicS3FS('${bucketName}')`)
