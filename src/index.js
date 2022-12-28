@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const childProcess = require('child_process')
 const v8 = require('v8')
 const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
@@ -32,8 +32,23 @@ class CyclicS3FS {
     return obj
   }
 
+  async writeFile(fileName, data, options) {
+    const cmd = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: fileName,
+        Body: data
+    })
+
+    let result = await this.s3.send(cmd)
+    return result
+  }
+
   readFileSync(fileName) {
     return sync_interface.runSync(this,'readFile',[fileName])
+  }
+  
+  writeFileSync(fileName, data, options) {
+    return sync_interface.runSync(this,'writeFile',[fileName, data, options])
   }
 
 
