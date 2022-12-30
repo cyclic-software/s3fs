@@ -10,9 +10,6 @@ const runSync =  function(client, method, args){
     const bucket = client.bucket
     const config = JSON.stringify(client.config)
     const args_serialized = v8.serialize(args)
-    // console.log(args_serialized)
-    // return 
-    // console.log(args_serialized)
     const {error: subprocessError, stdout, stderr} = childProcess.spawnSync(
         `node`, [`${path.resolve(__dirname,'./sync_interface.js')}`,
                 bucket,
@@ -33,7 +30,6 @@ const runSync =  function(client, method, args){
     //     stderr: stderr?.toString(),
     //   })
   
-    //   return
       let error = stderr?.toString()
       if(error){
         throw error
