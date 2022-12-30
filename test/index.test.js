@@ -1,6 +1,6 @@
 const fs = require("fs")
 const path = require("path")
-const BUCKET = 'infra-man-348655018330-us-east-2'
+const BUCKET = process.env.BUCKET
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const s3 = new S3Client({});
 
@@ -41,7 +41,7 @@ describe("Basic smoke tests", () => {
 
   test("readFileSync(json)", async () => {
     const d = require("fs").readFileSync('test/_read.json')
-    
+
     const fs = new s3fs(BUCKET)
     const _d = fs.readFileSync('test/_read.json')
 
@@ -62,21 +62,21 @@ describe("Basic smoke tests", () => {
     let content = JSON.stringify({
       [Date.now()]: Date.now(),
     })
-    
+
     const fs = new s3fs(BUCKET)
     fs.writeFileSync('test/_write.json', content)
     let x = fs.readFileSync('test/_write.json')
-    
+
     expect(x.toString()).toEqual(content)
   })
-  
+
   test("writeFileSync(big_text)", async () => {
     const big_text = require("fs").readFileSync('test/_read_big.txt')
 
     const fs = new s3fs(BUCKET)
     fs.writeFileSync('test/_write_big.txt', big_text)
     let x = fs.readFileSync('test/_write_big.txt')
-    
+
     expect(x.toString()).toEqual(big_text.toString())
   })
 
@@ -86,7 +86,7 @@ describe("Basic smoke tests", () => {
     const fs = new s3fs(BUCKET)
     fs.writeFileSync('test/_write.jpeg', jpeg)
     let jpeg_s3 = fs.readFileSync('test/_write.jpeg')
-    
+
     expect(Buffer.compare(jpeg_s3, jpeg)).toEqual(0)
   })
 
