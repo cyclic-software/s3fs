@@ -5,7 +5,7 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --detectOpenHandles --forceExit",
     "prepare": "husky install"
   },
   "keywords": [

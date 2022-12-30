@@ -1,5 +1,5 @@
 const fs = require('fs')
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, GetObjectCommand, ListObjectsV2Command } = require("@aws-sdk/client-s3");
 
 
 function streamToBuffer(stream) {
@@ -9,6 +9,19 @@ function streamToBuffer(stream) {
     stream.on("error", reject);
     stream.on("end", () => resolve(Buffer.concat(chunks))); // can call .toString("utf8") on the buffer
   });
+}
+
+function readFileSync_v3(s3, bucket, fileName){
+  let done = false;
+  let result = null;
+  s3.send(new ListObjectsV2Command({
+          Bucket: bucket,
+          Prefix: '/'
+  })).then((res)=>{
+      result = res;
+  });
+  require('deasync').loopWhile(function(){return !result;});
+  return result.Contents
 }
 
 class CyclicS3FS {
@@ -29,6 +42,11 @@ class CyclicS3FS {
   }
 
   readFileSync(fileName) {
+    readFileSync_v3(this.s3, this.bucket, fileName)
+  }
+
+
+  readFileSync_v2(fileName) {
     var result = null
     var done = false
     var start = Date.now()
