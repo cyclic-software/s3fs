@@ -4,18 +4,28 @@ const childProcess = require('child_process')
 const v8 = require('v8')
 const s3fs = require("./index.js")
 const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
+var fs = require("fs");
 
 const runSync =  function(client, method, args){
     const bucket = client.bucket
     const config = JSON.stringify(client.config)
-    const args_serialized = v8.serialize(args).toString('hex');
+    const args_serialized = v8.serialize(args)
+    // console.log(args_serialized)
+    // return 
+    // console.log(args_serialized)
     const {error: subprocessError, stdout, stderr} = childProcess.spawnSync(
         `node`, [`${path.resolve(__dirname,'./sync_interface.js')}`,
                 bucket,
                 config,
                 method,
-                args_serialized
+                // args_serialized
             ], {
+                input: Buffer.from(args_serialized),
+                // stdio: [
+                //     Buffer.from(args),
+                //     'inherit',
+                //     'inherit'
+                // ],
                 maxBuffer: HUNDRED_MEGABYTES,
                 env: {
                     ...process.env,
@@ -28,16 +38,15 @@ const runSync =  function(client, method, args){
     //     stderr: stderr?.toString(),
     //   })
   
+    //   return
       let error = stderr?.toString()
       if(error){
         throw error
       }
       
   
-      let result = stdout?.toString()
-      if(result){
-        const r = v8.deserialize(Buffer.from(result,'hex'));
-        return r
+      if(stdout){
+        return stdout
       }
 }
 
@@ -51,16 +60,24 @@ const run = async function(bucket, config, method, args){
     const fs = new s3fs(bucket, config)
     let result = await fs[method](...args)
 
-    const serialized = v8.serialize(result).toString('hex');
-    process.stdout.write(serialized);
+    // const serialized = v8.serialize(result).toString('hex');
+    process.stdout.write(result);
 }
 
 if (require.main === module) {
+
     let _argv = process.argv.slice(2,)
     let bucket = _argv[0]
     let config = JSON.parse(_argv[1])
     let method = _argv[2]
-    let args = _argv[3]
-    args = v8.deserialize(Buffer.from(args,'hex'));
+    // let args = _argv[3]
+    // console.log('method',method)
+    
+    var stdinBuffer = fs.readFileSync(process.stdin.fd); // STDIN_FILENO = 0
+    let args = v8.deserialize(stdinBuffer);
+    // console.log(args[0])
+    // var stdinBuffer = stdinToString()
+    // console.log(stdinBuffer.toString());
+
     run(bucket, config, method, args)
 }
