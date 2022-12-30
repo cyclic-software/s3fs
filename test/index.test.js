@@ -11,8 +11,14 @@ beforeAll(async () => {
   await s3.send(new PutObjectCommand({
     Bucket: BUCKET,
     Key: 'test/_read.json',
-    Body: fs.readFileSync(path.resolve(__dirname,'./_read.json')).toString(),
+    Body: fs.readFileSync(path.resolve(__dirname,'./_read.json')),
     ContentType: 'application/json'
+  }))
+  await s3.send(new PutObjectCommand({
+    Bucket: BUCKET,
+    Key: 'test/_read.jpeg',
+    Body: fs.readFileSync(path.resolve(__dirname,'./_read.jpeg')),
+    ContentType: 'image/jpeg'
   }))
 })
 
@@ -23,7 +29,7 @@ describe("Basic smoke tests", () => {
     const fs = new s3fs(BUCKET)
     expect(s3fs).toBeDefined()
   })
-  test("readFile()", async () => {
+  test("readFile(json)", async () => {
 
     const fs = new s3fs(BUCKET)
     const d = await fs.readFile('test/_read.json')
@@ -33,21 +39,22 @@ describe("Basic smoke tests", () => {
   })
 
 
-  test("readFileSync()", async () => {
-    const d = fs.readFileSync('test/_read.json')
+  test("readFileSync(json)", async () => {
+    const d = require("fs").readFileSync('test/_read.json')
     
-    const _fs = new s3fs(BUCKET)
-    const _d = _fs.readFileSync('test/_read.json')
+    const fs = new s3fs(BUCKET)
+    const _d = fs.readFileSync('test/_read.json')
 
     expect(JSON.parse(d)).toEqual(JSON.parse(_d))
   })
 
-  test("writeFileSync()", async () => {
-    const d = fs.readFileSync('test/_read.json')
 
-    const _fs = new s3fs(BUCKET)
-    const _d = _fs.readFileSync('test/_read.json')
+  test("readFileSync(jpeg)", async () => {
+    const d = require("fs").readFileSync('test/_read.jpeg')
 
-    expect(JSON.parse(d)).toEqual(JSON.parse(_d))
+    const fs = new s3fs(BUCKET)
+    const _d = fs.readFileSync('test/_read.jpeg')
+
+    expect(Buffer.compare(d, _d)).toEqual(0)
   })
 })
