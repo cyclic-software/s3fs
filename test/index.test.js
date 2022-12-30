@@ -69,6 +69,16 @@ describe("Basic smoke tests", () => {
     
     expect(x.toString()).toEqual(content)
   })
+  
+  test("writeFileSync(big_text)", async () => {
+    const big_text = require("fs").readFileSync('test/_read_big.txt')
+
+    const fs = new s3fs(BUCKET)
+    fs.writeFileSync('test/_write_big.txt', big_text)
+    let x = fs.readFileSync('test/_write_big.txt')
+    
+    expect(x.toString()).toEqual(big_text.toString())
+  })
 
   test("writeFileSync(jpeg)", async () => {
     const jpeg = require("fs").readFileSync('test/_read.jpeg')
