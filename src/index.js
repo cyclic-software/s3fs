@@ -1,7 +1,10 @@
 const fs = require('fs')
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-
-
+const path = require('path')
+const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
+const childProcess = require('child_process')
+const v8 = require('v8')
+const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
+const sync_interface = require('./sync_interface')
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -12,44 +15,44 @@ function streamToBuffer(stream) {
 }
 
 class CyclicS3FS {
-  constructor(bucketName) {
-    console.log(`new CyclicS3FS('${bucketName}')`)
+  constructor(bucketName, config={}) {
     this.bucket = bucketName
-    this.s3 = new S3Client({});
+    this.config = config
+    this.s3 = new S3Client({...config});
   }
 
   async readFile(fileName) {
     const cmd = new GetObjectCommand({
       Bucket: this.bucket,
       Key: fileName,
-    })
+      })
 
     let obj = await this.s3.send(cmd)
-    return streamToBuffer(obj.Body)
+    obj = await streamToBuffer(obj.Body)
+    return obj
+  }
+
+  async writeFile(fileName, data, options) {
+    const cmd = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: fileName,
+        Body: data
+    })
+
+    let result = await this.s3.send(cmd)
+    return result
   }
 
   readFileSync(fileName) {
-    var result = null
-    var done = false
-
-    this.readFile(fileName).then((res) => {
-      console.log('then')
-      result = res.Body?.transformToString()
-    }).catch((err) => {
-      console.log('catch')
-      console.error(err)
-      result = {msg: `failed to get ${fileName}`, error: err}
-    }).finally(() => {
-      console.log('finally')
-      done = true
-      result = result || {msg: `unknown error ${fileName}`}
-    })
-    console.log('looping')
-    require('deasync').loopWhile(()=> {return !done})
-    console.log('returning')
-    return result
-    // return fs.readFileSync(fileName)
+    return sync_interface.runSync(this,'readFile',[fileName])
   }
+  
+  writeFileSync(fileName, data, options) {
+    return sync_interface.runSync(this,'writeFile',[fileName, data, options])
+  }
+
+
+
 }
 
 module.exports = CyclicS3FS

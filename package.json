@@ -41,7 +41,6 @@
     ]
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.226.0",
-    "deasync": "^0.1.28"
+    "@aws-sdk/client-s3": "^3.226.0"
   }
 }
