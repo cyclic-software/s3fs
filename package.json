@@ -5,7 +5,7 @@
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
-    "test": "env-cmd jest",
+    "test": "env-cmd --silent jest",
     "prepare": "husky install"
   },
   "keywords": [
