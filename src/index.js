@@ -32,22 +32,21 @@ class CyclicS3FS {
     return obj
   }
 
-  async writeFile(fileName, data, options) {
+  async writeFile(fileName, data, options={}) {
     const cmd = new PutObjectCommand({
         Bucket: this.bucket,
         Key: fileName,
         Body: data
     })
 
-    let result = await this.s3.send(cmd)
-    return result
+    await this.s3.send(cmd)
   }
 
   readFileSync(fileName) {
     return sync_interface.runSync(this,'readFile',[fileName])
   }
   
-  writeFileSync(fileName, data, options) {
+  writeFileSync(fileName, data, options={}) {
     return sync_interface.runSync(this,'writeFile',[fileName, data, options])
   }
 

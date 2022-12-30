@@ -21,11 +21,6 @@ const runSync =  function(client, method, args){
                 // args_serialized
             ], {
                 input: Buffer.from(args_serialized),
-                // stdio: [
-                //     Buffer.from(args),
-                //     'inherit',
-                //     'inherit'
-                // ],
                 maxBuffer: HUNDRED_MEGABYTES,
                 env: {
                     ...process.env,
@@ -56,12 +51,11 @@ module.exports = {
     runSync,
 }
 const run = async function(bucket, config, method, args){
-        
     const fs = new s3fs(bucket, config)
     let result = await fs[method](...args)
-
-    // const serialized = v8.serialize(result).toString('hex');
-    process.stdout.write(result);
+    if(result){
+        process.stdout.write(result);
+    }
 }
 
 if (require.main === module) {
@@ -70,14 +64,13 @@ if (require.main === module) {
     let bucket = _argv[0]
     let config = JSON.parse(_argv[1])
     let method = _argv[2]
-    // let args = _argv[3]
-    // console.log('method',method)
-    
-    var stdinBuffer = fs.readFileSync(process.stdin.fd); // STDIN_FILENO = 0
-    let args = v8.deserialize(stdinBuffer);
-    // console.log(args[0])
-    // var stdinBuffer = stdinToString()
-    // console.log(stdinBuffer.toString());
+    var buf = '';
 
-    run(bucket, config, method, args)
+    process.stdin.on('data', function(d) {
+        buf += d;
+      }).on('end', function() {
+        let args = v8.deserialize(Buffer.from(buf,'binary'));
+        run(bucket, config, method, args)
+      }).setEncoding('binary');
+
 }

@@ -57,4 +57,28 @@ describe("Basic smoke tests", () => {
 
     expect(Buffer.compare(d, _d)).toEqual(0)
   })
+
+  test("writeFileSync(json)", async () => {
+    let content = JSON.stringify({
+      [Date.now()]: Date.now(),
+    })
+    
+    const fs = new s3fs(BUCKET)
+    fs.writeFileSync('test/_write.json', content)
+    let x = fs.readFileSync('test/_write.json')
+    
+    expect(x.toString()).toEqual(content)
+  })
+
+  test("writeFileSync(jpeg)", async () => {
+    const jpeg = require("fs").readFileSync('test/_read.jpeg')
+
+    const fs = new s3fs(BUCKET)
+    fs.writeFileSync('test/_write.jpeg', jpeg)
+    let jpeg_s3 = fs.readFileSync('test/_write.jpeg')
+    
+    expect(Buffer.compare(jpeg_s3, jpeg)).toEqual(0)
+  })
+
+
 })
