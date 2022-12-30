@@ -1,6 +1,7 @@
-name: Release
+name: integration tests
+
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -12,18 +13,13 @@ env:
   CYCLIC_DB: db-sdkCyclicDB
 
 jobs:
-  release:
-    name: release
+  checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
         with:
-          cache: npm
-          node-version: 16
+          node-version: '16.x'
       - run: npm ci
       - run: npm run test
-      - run: npx semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
