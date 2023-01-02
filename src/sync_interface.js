@@ -48,7 +48,7 @@ module.exports = {
 }
 const run = async function(bucket, config, method, args){
     const fs = new s3fs(bucket, config)
-    let result = await fs[method](...args)
+    let result = await fs.promises[method](...args)
     if(result){
         process.stdout.write(result);
     }

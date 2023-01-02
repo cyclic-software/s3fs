@@ -29,14 +29,52 @@ describe("Basic smoke tests", () => {
     const fs = new s3fs(BUCKET)
     expect(s3fs).toBeDefined()
   })
-  test("readFile(json)", async () => {
 
+  test("readFile(json) - promises", async () => {
     const fs = new s3fs(BUCKET)
-    const d = await fs.readFile('test/_read.json')
+    const d = await fs.promises.readFile('test/_read.json')
     const s = d.toString("utf8")
     const json = JSON.parse(s)
     expect(json).toEqual({key: 'value'})
   })
+
+  test("readFile(json) - callback", async () => {
+    await new Promise((resolve,reject)=>{
+      const fs = new s3fs(BUCKET)
+      fs.readFile('test/_read.json', (error,data)=>{
+        const json = JSON.parse(data)
+        expect(json).toEqual({key: 'value'})
+        resolve()
+      })
+    })
+  })
+
+  test("writeFile(json) - promises", async () => {
+    let content = JSON.stringify({
+      [Date.now()]: Date.now(),
+    })
+    
+    const fs = new s3fs(BUCKET)
+    await fs.promises.writeFile('test/_write.json',content)
+    let x = fs.readFileSync('test/_write.json')
+    expect(x.toString()).toEqual(content)
+  })
+
+  test("writeFile(json) - callback", async () => {
+    await new Promise((resolve,reject)=>{
+      let content = JSON.stringify({
+        [Date.now()]: Date.now(),
+      })
+      
+      const fs = new s3fs(BUCKET)
+      fs.writeFile('test/_write.json',content,()=>{
+        let x = fs.readFileSync('test/_write.json')
+        expect(x.toString()).toEqual(content)
+        resolve()
+      })
+    })
+  })
+
 
 
   test("readFileSync(json)", async () => {
