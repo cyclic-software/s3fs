@@ -14,13 +14,6 @@ function streamToBuffer(stream) {
   });
 }
 
-
-function identity(x) { return x; }
-
-function slice(arrayish, arg1, arg2) {
-  return Array.prototype.slice.call(arrayish, arg1, arg2);
-}
-
 // Ensure that callbacks run in the global context. Only use this function
 // for callbacks that are passed to the binding layer, callbacks that are
 // invoked from JS already run in the proper scope.
