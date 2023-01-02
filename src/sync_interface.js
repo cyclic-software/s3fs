@@ -49,7 +49,10 @@ module.exports = {
 const run = async function(bucket, config, method, args){
     const fs = new s3fs(bucket, config)
     let result = await fs.promises[method](...args)
-    if(result){
+    if(typeof result !== 'undefined'){
+        if(typeof result == 'boolean'){
+          result = result ? 'true' : 'false'
+        }
         process.stdout.write(result);
     }
 }

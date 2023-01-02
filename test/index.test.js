@@ -128,5 +128,41 @@ describe("Basic smoke tests", () => {
     expect(Buffer.compare(jpeg_s3, jpeg)).toEqual(0)
   })
 
+  test("exists(json) - promises", async () => {
+    const fs = new s3fs(BUCKET)
+    let exists = await fs.promises.exists('test/_read.json')
+    expect(exists).toEqual(true)
+    
+    let exists_false = await fs.promises.exists('test/_readxxx.json')
+    expect(exists_false).toEqual(false)
+  })
+
+  test("exists(json) - callback", async () => {
+    await new Promise((resolve,reject)=>{
+      const fs = new s3fs(BUCKET)
+      fs.exists('test/_read.json',(error,result)=>{
+        expect(result).toEqual(true)
+        resolve()
+      })
+    })
+
+    await new Promise((resolve,reject)=>{
+      const fs = new s3fs(BUCKET)
+      fs.exists('test/_readxxx.json',(error,result)=>{
+        expect(result).toEqual(false)
+        resolve()
+      })
+    })
+  })
+
+  test("existsSync(json)", async () => {
+    const fs = new s3fs(BUCKET)
+    let exists = fs.existsSync('test/_read.jpeg')
+    expect(exists).toEqual(true)
+    
+    let exists_false = fs.existsSync('test/_readxxx.jpeg')
+    expect(exists_false).toEqual(false)
+  })
+
 
 })
