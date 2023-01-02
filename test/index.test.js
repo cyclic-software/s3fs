@@ -30,7 +30,6 @@ describe("Basic smoke tests", () => {
     expect(s3fs).toBeDefined()
   })
   test("readFile(json)", async () => {
-
     const fs = new s3fs(BUCKET)
     const d = await fs.readFile('test/_read.json')
     const s = d.toString("utf8")
