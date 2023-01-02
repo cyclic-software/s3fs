@@ -35,9 +35,9 @@ class CyclicS3FS {
   //   }
   // }
 
-  async readFile(fileName) {
+  async readFile(fileName, encoding='utf8', cb) {
     if (this.isLocal){
-      return fs.readFile(fileName)
+      return fs.readFile(fileName, encoding, cb)
     }
     const cmd = new GetObjectCommand({
       Bucket: this.bucket,
@@ -51,7 +51,7 @@ class CyclicS3FS {
 
   async writeFile(fileName, data, options={}) {
     if (this.isLocal){
-      return fs.writeFile(fileNAme, data, options)
+      return fs.writeFile(fileName, data, options)
     }
     const cmd = new PutObjectCommand({
         Bucket: this.bucket,
@@ -64,14 +64,14 @@ class CyclicS3FS {
 
   readFileSync(fileName) {
     if (this.isLocal){
-      return fs.readFileSync(fileNAme)
+      return fs.readFileSync(fileName)
     }
     return sync_interface.runSync(this,'readFile',[fileName])
   }
 
   writeFileSync(fileName, data, options={}) {
     if (this.isLocal){
-      return fs.writeFileSync(fileNAme, data, options)
+      return fs.writeFileSync(fileName, data, options)
     }
     return sync_interface.runSync(this,'writeFile',[fileName, data, options])
   }
