@@ -12,7 +12,10 @@ Drop in replacement for Node.js fs library backed by AWS s3.
   - [x] promise
   - [x] cb
   - [x] sync
-- [ ] fs.exists(path, callback)
+- [x] fs.exists(path, callback)
+  - [x] promise
+  - [x] cb
+  - [x] sync
 - [ ] fs.readdir(path, callback)
 - [ ] fs.mkdir(path, [mode], callback)
 - [ ] fs.rmdir(path, callback)
