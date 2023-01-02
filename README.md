@@ -21,6 +21,7 @@ Drop in replacement for Node.js fs library backed by AWS s3.
 - [ ] fs.createReadStream(path, [options])
 - [ ] fs.createWriteStream(path, [options])
 - [ ] fs.unlink(path, callback)
+- [ ] fs.rm(path, callback)
 
 
 
