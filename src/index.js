@@ -1,12 +1,10 @@
 const fs = require('fs')
-const util = require('util')
 const path = require('path')
 const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
 const childProcess = require('child_process')
 const v8 = require('v8')
 const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
 const sync_interface = require('./sync_interface');
-const { resolve } = require('path');
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
     const chunks = [];
