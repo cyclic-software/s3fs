@@ -21,29 +21,6 @@ function slice(arrayish, arg1, arg2) {
   return Array.prototype.slice.call(arrayish, arg1, arg2);
 }
 
-// Makes a transformer from promise-returning functions to
-// callback-accepting functions.
-function to_cb_accepting_fn(transform) {
-  transform = transform || identity;
-  return function(proc) {
-
-    function f(self) {
-      return function(/* args..., callback*/) {
-        var callback = arguments[arguments.length - 1];
-        proc.apply(self, slice(arguments, 0, -1))
-          .then(function(value) {
-            callback(null, transform(value));
-          }, callback);
-      };
-    }
-
-    var func = f(proc);
-    func.as_property_of = f;
-
-    return func;
-  };
-}
-
 // Ensure that callbacks run in the global context. Only use this function
 // for callbacks that are passed to the binding layer, callbacks that are
 // invoked from JS already run in the proper scope.
