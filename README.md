@@ -26,5 +26,5 @@ Drop in replacement for Node.js fs library backed by AWS s3.
 
 refer to fs, s3fs:
 
-https://github.com/TooTallNate/s3fs
-https://nodejs.org/docs/latest-v0.10.x/api/fs.html#fs_fs_mkdir_path_mode_callback
+- https://github.com/TooTallNate/s3fs
+- https://nodejs.org/docs/latest-v0.10.x/api/fs.html#fs_fs_mkdir_path_mode_callback
