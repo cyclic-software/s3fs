@@ -70,7 +70,7 @@ class CyclicS3FS {
 
 
   
-  readFile() {
+  readFile(fileName, options, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
       try{
