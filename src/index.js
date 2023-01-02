@@ -6,9 +6,6 @@ const {
   PutObjectCommand,
   HeadObjectCommand,
 } = require("@aws-sdk/client-s3");
-const childProcess = require('child_process')
-const v8 = require('v8')
-const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
 const sync_interface = require('./sync_interface');
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
