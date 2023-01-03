@@ -2,7 +2,8 @@ const path = require('path')
 const process = require('process')
 const childProcess = require('child_process')
 const v8 = require('v8')
-const s3fs = require("./index.js")
+const CyclicS3FSPromises = require('./CyclicS3FSPromises')
+
 const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
 var fs = require("fs");
 
@@ -47,7 +48,7 @@ module.exports = {
     runSync,
 }
 const run = async function(bucket, config, method, args){
-    const fs = new s3fs(bucket, config)
+    const fs = new CyclicS3FSPromises(bucket, config)
     let result = await fs.promises[method](...args)
     if(typeof result !== 'undefined'){
         if(typeof result == 'boolean'){

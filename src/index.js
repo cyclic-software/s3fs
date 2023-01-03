@@ -1,20 +1,5 @@
 const fs = require('fs')
-const path = require('path')
-const { 
-  S3Client, 
-  GetObjectCommand, 
-  PutObjectCommand,
-  HeadObjectCommand,
-} = require("@aws-sdk/client-s3");
-const sync_interface = require('./sync_interface');
-function streamToBuffer(stream) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    stream.on("data", (chunk) => chunks.push(chunk));
-    stream.on("error", reject);
-    stream.on("end", () => resolve(Buffer.concat(chunks))); // can call .toString("utf8") on the buffer
-  });
-}
+const CyclicS3FSPromises = require('./CyclicS3FSPromises')
 
 // Ensure that callbacks run in the global context. Only use this function
 // for callbacks that are passed to the binding layer, callbacks that are
@@ -33,63 +18,17 @@ function makeCallback(cb) {
   };
 }
 
-
-class CyclicS3FS {
+class CyclicS3FS extends CyclicS3FSPromises {
   constructor(bucketName, config={}) {
-    this.bucket = bucketName
-    this.config = config
-    this.s3 = new S3Client({...config});
+    super(bucketName, config={})
   }
-
-  promises = {
-    readFile: async (fileName ,options) => {
-      const cmd = new GetObjectCommand({
-        Bucket: this.bucket,
-        Key: fileName,
-        })
-  
-      let obj = await this.s3.send(cmd)
-      obj = await streamToBuffer(obj.Body)
-      return obj
-    },
-
-    writeFile: async (fileName, data, options={}) => {
-      const cmd = new PutObjectCommand({
-          Bucket: this.bucket,
-          Key: fileName,
-          Body: data
-      })
-      await this.s3.send(cmd)
-    },
-
-    exists: async (fileName, data, options={}) => {
-      const cmd = new HeadObjectCommand({
-          Bucket: this.bucket,
-          Key: fileName
-      })
-      let exists
-      try{
-         let res = await this.s3.send(cmd)
-         if(res.LastModified){
-           exists = true
-         }
-      }catch(e){
-        if(e.name === 'NotFound'){
-          exists = false
-        }
-      }
-      return exists
-    },
-
-  }
-
 
   
   readFile(fileName, options, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
       try{
-        let res = await this.promises.readFile(...arguments)
+        let res = await super.readFile(...arguments)
         return resolve(callback(null,res))
       }catch(e){
         return resolve(callback(e))
@@ -101,7 +40,7 @@ class CyclicS3FS {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
       try{
-        let res = await this.promises.writeFile(...arguments)
+        let res = await super.writeFile(...arguments)
         return resolve(callback(null,res))
       }catch(e){
         return resolve(callback(e))
@@ -113,7 +52,7 @@ class CyclicS3FS {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
       try{
-        let res = await this.promises.exists(...arguments)
+        let res = await super.exists(...arguments)
         return resolve(callback(null,res))
       }catch(e){
         return resolve(callback(e))
@@ -136,8 +75,15 @@ class CyclicS3FS {
     return exists
   }
 
-
-
 }
 
-module.exports = CyclicS3FS
+
+const client = function(bucketName, config={}){
+    if(!process.env.AWS_SECRET_ACCESS_KEY){
+      console.warn('[s3fs] WARNING: AWS credentials are not set. Using local file system')
+      return fs
+    }
+    return new CyclicS3FS(bucketName, config)
+}
+
+module.exports = client
