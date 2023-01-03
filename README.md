@@ -5,11 +5,11 @@ Drop in replacement for the Node.js `fs` library backed by AWS S3.
 Require in the same format as Node.js `fs`, specifying an S3 Bucket: 
 - Callbacks and Sync methods:
   ```js
-  const fs = require('@cyclic.sh/s3fs')(AWS_BUCKET)
+  const fs = require('@cyclic.sh/s3fs')(S3_BUCKET_NAME)
   ```
 - Promises
   ```js
-  const fs = require('@cyclic.sh/s3fs/promises')(AWS_BUCKET)
+  const fs = require('@cyclic.sh/s3fs/promises')(S3_BUCKET_NAME)
   ```
 
 ## Supported methods

@@ -57,6 +57,8 @@ class CyclicS3FSPromises{
     }catch(e){
       if(e.name === 'NotFound'){
         exists = false
+      }else{
+        throw e
       }
     }
     return exists
@@ -94,6 +96,8 @@ class CyclicS3FSPromises{
     }catch(e){
       if(e.name === 'NotFound'){
         throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+      }else{
+        throw e
       }
     }
     return result
