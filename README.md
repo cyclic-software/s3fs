@@ -19,7 +19,10 @@ Drop in replacement for Node.js fs library backed by AWS s3.
 - [ ] fs.readdir(path, callback)
 - [ ] fs.mkdir(path, [mode], callback)
 - [ ] fs.rmdir(path, callback)
-- [ ] fs.stat(path, callback)
+- [x] fs.stat(path, callback)
+  - [x] promise
+  - [x] cb
+  - [x] sync
 - [ ] fs.lstat(path, callback)
 - [ ] fs.createReadStream(path, [options])
 - [ ] fs.createWriteStream(path, [options])
