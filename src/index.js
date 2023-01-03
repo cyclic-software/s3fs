@@ -1,6 +1,7 @@
 const fs = require('fs')
 const CyclicS3FSPromises = require('./CyclicS3FSPromises')
 const sync_interface = require('./sync_interface');
+const v8 = require('v8')
 
 // Ensure that callbacks run in the global context. Only use this function
 // for callbacks that are passed to the binding layer, callbacks that are
@@ -60,6 +61,18 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
+
+  stat(fileName, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        let res = await super.stat(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
   
 
   readFileSync(fileName) {
@@ -72,8 +85,15 @@ class CyclicS3FS extends CyclicS3FSPromises {
 
   existsSync(fileName) {
     let res = sync_interface.runSync(this,'exists',[fileName])
-    let exists = res.toString() === 'true' ? true : false
-    return exists
+    // let exists = res.toString() === 'true' ? true : false
+    res = v8.deserialize(res)
+    return res
+  }
+
+  statSync(fileName) {
+    let res = sync_interface.runSync(this,'stat',[fileName])
+    res = v8.deserialize(res)
+    return res
   }
 
 }

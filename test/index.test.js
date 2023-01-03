@@ -9,18 +9,25 @@ const s3fs_promises = require("../src/promises")
 
 beforeAll(async () => {
   console.log('preparing test')
-  await s3.send(new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: 'test/_read.json',
-    Body: fs.readFileSync(path.resolve(__dirname,'./_read.json')),
-    ContentType: 'application/json'
-  }))
-  await s3.send(new PutObjectCommand({
-    Bucket: BUCKET,
-    Key: 'test/_read.jpeg',
-    Body: fs.readFileSync(path.resolve(__dirname,'./_read.jpeg')),
-    ContentType: 'image/jpeg'
-  }))
+  try{
+
+    await s3.send(new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: 'test/_read.json',
+      Body: fs.readFileSync(path.resolve(__dirname,'./_read.json')),
+      ContentType: 'application/json'
+    }))
+    await s3.send(new PutObjectCommand({
+      Bucket: BUCKET,
+      Key: 'test/_read.jpeg',
+      Body: fs.readFileSync(path.resolve(__dirname,'./_read.jpeg')),
+      ContentType: 'image/jpeg'
+    }))
+
+  }catch(e){
+    console.warn(e)
+    console.warn('running s3fs in local mode')
+  }
 })
 
 // const bucket = 'cyclic-sh-s3fs-test-bucket-us-east-2'
@@ -166,5 +173,38 @@ describe("Basic smoke tests", () => {
     expect(exists_false).toEqual(false)
   })
 
+
+  test("statSync(json)", async () => {
+    const fs = s3fs(BUCKET)
+    let stat = fs.statSync('test/_read.json')
+    expect(stat).toHaveProperty('size')
+    expect(stat).toHaveProperty('birthtime')
+    expect(stat.size).toEqual(21)
+    
+  })
+
+  test("stat(json) - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    let stat = await fs.stat('test/_read.json')
+    expect(stat).toHaveProperty('size')
+    expect(stat).toHaveProperty('birthtime')
+    expect(stat.size).toEqual(21)
+    
+  })
+
+  test("stat(json) - callback", async () => {
+    await new Promise((resolve,reject)=>{
+      const fs = s3fs(BUCKET)
+      fs.stat('test/_read.json',(error,result)=>{
+        expect(result).toHaveProperty('size')
+        expect(result).toHaveProperty('birthtime')
+        expect(result.size).toEqual(21)
+        resolve()
+      })
+    })
+    
+  })
+
+  
 
 })

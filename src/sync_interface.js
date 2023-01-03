@@ -26,10 +26,10 @@ const runSync =  function(client, method, args){
                 }
             );
 
-    //   console.log({
-    //     stdout: stdout?.toString(),
-    //     stderr: stderr?.toString(),
-    //   })
+      // console.log({
+      //   stdout: stdout?.toString(),
+      //   stderr: stderr?.toString(),
+      // })
   
       let error = stderr?.toString()
       if(error){
@@ -51,8 +51,8 @@ const run = async function(bucket, config, method, args){
     const fs = new CyclicS3FSPromises(bucket, config)
     let result = await fs[method](...args)
     if(typeof result !== 'undefined'){
-        if(typeof result == 'boolean'){
-          result = result ? 'true' : 'false'
+        if(['stat','exists'].includes(method)){
+            result = v8.serialize(result)
         }
         process.stdout.write(result);
     }

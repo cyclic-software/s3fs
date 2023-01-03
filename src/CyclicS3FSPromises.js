@@ -4,6 +4,8 @@ const {
   PutObjectCommand,
   HeadObjectCommand,
 } = require("@aws-sdk/client-s3");
+
+const {Stats} = require('fs')
 const sync_interface = require('./sync_interface');
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
@@ -59,6 +61,44 @@ class CyclicS3FSPromises{
     }
     return exists
   }
+  
+  async stat(fileName, data, options={}){
+    const cmd = new HeadObjectCommand({
+        Bucket: this.bucket,
+        Key: fileName
+    })
+    let result;
+    try{
+       let data = await this.s3.send(cmd)
+       let modified_ms = new Date(data.LastModified).getTime()
+       result = new Stats(...Object.values({
+            dev: 0,
+            mode: 0,
+            nlink: 0,
+            uid: 0,
+            gid: 0,
+            rdev: 0,
+            blksize: 0,
+            ino: 0,
+            size: Number(data.ContentLength),
+            blocks: 0,
+            atimeMs: modified_ms,
+            mtimeMs: modified_ms,
+            ctimeMs: modified_ms,
+            birthtimeMs: modified_ms,
+            atime: data.LastModified,
+            mtime: data.LastModified,
+            ctime: data.LastModified,
+            birthtime: data.LastModified
+        }));
+    }catch(e){
+      if(e.name === 'NotFound'){
+        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+      }
+    }
+    return result
+  }
+
 }
 
 

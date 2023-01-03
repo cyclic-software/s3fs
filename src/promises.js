@@ -1,4 +1,4 @@
-const fs = require('fs')
+const fs = require('fs/promises')
 const CyclicS3FSPromises = require('./CyclicS3FSPromises')
 const client = function(bucketName, config={}){
     if(!process.env.AWS_SECRET_ACCESS_KEY){
