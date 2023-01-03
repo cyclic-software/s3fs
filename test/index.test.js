@@ -5,6 +5,7 @@ const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const s3 = new S3Client({});
 
 const s3fs = require("../src")
+const s3fs_promises = require("../src/promises")
 
 beforeAll(async () => {
   console.log('preparing test')
@@ -26,13 +27,13 @@ beforeAll(async () => {
 
 describe("Basic smoke tests", () => {
   test("test constructor", async () => {
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     expect(s3fs).toBeDefined()
   })
 
   test("readFile(json) - promises", async () => {
-    const fs = new s3fs(BUCKET)
-    const d = await fs.promises.readFile('test/_read.json')
+    const fs = s3fs_promises(BUCKET)
+    const d = await fs.readFile('test/_read.json')
     const s = d.toString("utf8")
     const json = JSON.parse(s)
     expect(json).toEqual({key: 'value'})
@@ -40,7 +41,7 @@ describe("Basic smoke tests", () => {
 
   test("readFile(json) - callback", async () => {
     await new Promise((resolve,reject)=>{
-      const fs = new s3fs(BUCKET)
+      const fs = s3fs(BUCKET)
       fs.readFile('test/_read.json', (error,data)=>{
         const json = JSON.parse(data)
         expect(json).toEqual({key: 'value'})
@@ -54,9 +55,10 @@ describe("Basic smoke tests", () => {
       [Date.now()]: Date.now(),
     })
     
-    const fs = new s3fs(BUCKET)
-    await fs.promises.writeFile('test/_write.json',content)
-    let x = fs.readFileSync('test/_write.json')
+    const fs = s3fs_promises(BUCKET)
+    await fs.writeFile('test/_write.json',content)
+
+    let x = await fs.readFile('test/_write.json')
     expect(x.toString()).toEqual(content)
   })
 
@@ -66,7 +68,7 @@ describe("Basic smoke tests", () => {
         [Date.now()]: Date.now(),
       })
       
-      const fs = new s3fs(BUCKET)
+      const fs = s3fs(BUCKET)
       fs.writeFile('test/_write.json',content,()=>{
         let x = fs.readFileSync('test/_write.json')
         expect(x.toString()).toEqual(content)
@@ -80,7 +82,7 @@ describe("Basic smoke tests", () => {
   test("readFileSync(json)", async () => {
     const d = require("fs").readFileSync('test/_read.json')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     const _d = fs.readFileSync('test/_read.json')
 
     expect(JSON.parse(d)).toEqual(JSON.parse(_d))
@@ -129,17 +131,17 @@ describe("Basic smoke tests", () => {
   })
 
   test("exists(json) - promises", async () => {
-    const fs = new s3fs(BUCKET)
-    let exists = await fs.promises.exists('test/_read.json')
+    const fs = s3fs_promises(BUCKET)
+    let exists = await fs.exists('test/_read.json')
     expect(exists).toEqual(true)
     
-    let exists_false = await fs.promises.exists('test/_readxxx.json')
+    let exists_false = await fs.exists('test/_readxxx.json')
     expect(exists_false).toEqual(false)
   })
 
   test("exists(json) - callback", async () => {
     await new Promise((resolve,reject)=>{
-      const fs = new s3fs(BUCKET)
+      const fs = s3fs(BUCKET)
       fs.exists('test/_read.json',(error,result)=>{
         expect(result).toEqual(true)
         resolve()
@@ -147,7 +149,7 @@ describe("Basic smoke tests", () => {
     })
 
     await new Promise((resolve,reject)=>{
-      const fs = new s3fs(BUCKET)
+      const fs = s3fs(BUCKET)
       fs.exists('test/_readxxx.json',(error,result)=>{
         expect(result).toEqual(false)
         resolve()
@@ -156,7 +158,7 @@ describe("Basic smoke tests", () => {
   })
 
   test("existsSync(json)", async () => {
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     let exists = fs.existsSync('test/_read.jpeg')
     expect(exists).toEqual(true)
     

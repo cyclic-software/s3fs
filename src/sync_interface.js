@@ -49,7 +49,7 @@ module.exports = {
 }
 const run = async function(bucket, config, method, args){
     const fs = new CyclicS3FSPromises(bucket, config)
-    let result = await fs.promises[method](...args)
+    let result = await fs[method](...args)
     if(typeof result !== 'undefined'){
         if(typeof result == 'boolean'){
           result = result ? 'true' : 'false'

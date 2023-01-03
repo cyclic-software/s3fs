@@ -1,5 +1,6 @@
 const fs = require('fs')
 const CyclicS3FSPromises = require('./CyclicS3FSPromises')
+const sync_interface = require('./sync_interface');
 
 // Ensure that callbacks run in the global context. Only use this function
 // for callbacks that are passed to the binding layer, callbacks that are
