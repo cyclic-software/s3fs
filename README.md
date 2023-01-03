@@ -42,7 +42,7 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
 ## Example Usage
 ### Authentication
 Authenticating the client can be done with one of two ways:
-- **Environment Variables** - the internal S3 client will use AWS credentials set in the environment
+- **Environment Variables** - the internal S3 client will use AWS credentials if set in the environment
   ```
   AWS_REGION
   AWS_ACCESS_KEY_ID
@@ -56,6 +56,7 @@ Authenticating the client can be done with one of two ways:
           credentials: {...}
       })
   ```    
+- **Local Mode** - When no credentials are available - the client will fall back to using `fs` and the local filesystem with a warning.
 
 
 ### Using Methods
