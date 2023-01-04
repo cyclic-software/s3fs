@@ -6,6 +6,7 @@ const {
 } = require("@aws-sdk/client-s3");
 
 const {Stats} = require('fs')
+const util = require('./util')
 const sync_interface = require('./sync_interface');
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
@@ -101,6 +102,29 @@ class CyclicS3FSPromises{
       }
     }
     return result
+  }
+  
+  async mkdir(path){
+    path = util.normalize_path(`${path}/`)
+    // console.log(__dirname)
+    console.log(path)
+    // return path.replace(__dirname,'')
+    const cmd = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: path,
+        // Body: data
+    })
+    
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+      if(e.name === 'NotFound'){
+        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+      }else{
+        throw e
+      }
+    }
+    // return result
   }
 
 }
