@@ -2,7 +2,8 @@ const path = require('path')
 const process = require('process')
 const childProcess = require('child_process')
 const v8 = require('v8')
-const s3fs = require("./index.js")
+const CyclicS3FSPromises = require('./CyclicS3FSPromises')
+
 const HUNDRED_MEGABYTES = 1000 * 1000 * 100;
 var fs = require("fs");
 
@@ -25,10 +26,10 @@ const runSync =  function(client, method, args){
                 }
             );
 
-    //   console.log({
-    //     stdout: stdout?.toString(),
-    //     stderr: stderr?.toString(),
-    //   })
+      // console.log({
+      //   stdout: stdout?.toString(),
+      //   stderr: stderr?.toString(),
+      // })
   
       let error = stderr?.toString()
       if(error){
@@ -47,9 +48,12 @@ module.exports = {
     runSync,
 }
 const run = async function(bucket, config, method, args){
-    const fs = new s3fs(bucket, config)
+    const fs = new CyclicS3FSPromises(bucket, config)
     let result = await fs[method](...args)
-    if(result){
+    if(typeof result !== 'undefined'){
+        if(['stat','exists'].includes(method)){
+            result = v8.serialize(result)
+        }
         process.stdout.write(result);
     }
 }
