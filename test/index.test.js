@@ -205,6 +205,12 @@ describe("Basic smoke tests", () => {
     
   })
 
+
+  test("mkdir() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    let stat = await fs.mkdir('dir')
+    
+  })
   
 
 })

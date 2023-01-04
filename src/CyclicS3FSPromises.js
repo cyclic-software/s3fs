@@ -4,7 +4,7 @@ const {
   PutObjectCommand,
   HeadObjectCommand,
 } = require("@aws-sdk/client-s3");
-
+const _path = require('path')
 const {Stats} = require('fs')
 const util = require('./util')
 const sync_interface = require('./sync_interface');
@@ -105,14 +105,10 @@ class CyclicS3FSPromises{
   }
   
   async mkdir(path){
-    path = util.normalize_path(`${path}/`)
-    // console.log(__dirname)
-    console.log(path)
-    // return path.replace(__dirname,'')
+    path = util.normalize_path(path)
     const cmd = new PutObjectCommand({
         Bucket: this.bucket,
-        Key: path,
-        // Body: data
+        Key: `s3fs:${path}`,
     })
     
     try{
