@@ -1,7 +1,7 @@
 {
   "name": "@cyclic.sh/s3fs",
   "version": "0.0.1",
-  "description": "Drop in replacement for Node.js fs library backed by AWS s3.",
+  "description": "Drop in replacement for Node.js fs library backed by AWS s3 with local filesystem fallback.",
   "type": "commonjs",
   "main": "src/index.js",
   "scripts": {
@@ -19,6 +19,10 @@
   "engines": {
     "node": ">=14.20.0"
   },
+  "repository": {
+      "type": "git",
+      "url": "git+https://github.com/cyclic-software/s3fs.git"
+  },
   "author": {
     "name": "Cyclic Software",
     "url": "https://www.cyclic.sh"
@@ -28,6 +32,10 @@
     "Kam Lasater (https://github.com/seekayel)"
   ],
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cyclic-software/s3fs/issues"
+  },
+  "homepage": "https://github.com/cyclic-software/s3fs#readme",
   "devDependencies": {
     "@commitlint/cli": "^17.3.0",
     "@commitlint/config-conventional": "^17.3.0",
