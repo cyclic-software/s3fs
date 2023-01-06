@@ -1,4 +1,4 @@
-const fs = require("fs")
+
 const path = require("path")
 const BUCKET = process.env.BUCKET
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
@@ -8,18 +8,19 @@ const s3fs = require("../src")
 const s3fs_promises = require("../src/promises")
 
 beforeAll(async () => {
+  const fs = require("fs")
   console.log('preparing test')
   try{
 
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
-      Key: 'test/_read.json',
+      Key: `${path.resolve(__dirname,'./_read.json').replace(new RegExp(`^${path.sep}+`, 'g'), '')}`,
       Body: fs.readFileSync(path.resolve(__dirname,'./_read.json')),
       ContentType: 'application/json'
     }))
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
-      Key: 'test/_read.jpeg',
+      Key: `${path.resolve(__dirname,'./_read.jpeg').replace(new RegExp(`^${path.sep}+`, 'g'), '')}`,
       Body: fs.readFileSync(path.resolve(__dirname,'./_read.jpeg')),
       ContentType: 'image/jpeg'
     }))
@@ -205,6 +206,78 @@ describe("Basic smoke tests", () => {
     
   })
 
+
+  test("mkdir(), readdir() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    let dir_name = `dir_${Date.now()}`
+    try{
+      let d = await fs.readdir(dir_name)
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    await fs.mkdir(dir_name)
+    
+    let d = await fs.readdir(dir_name)
+    expect(d).toEqual([])
+
+  })
   
+
+  test("mkdir(), readdir() - callback", async () => {
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      let dir_name = `dir_${Date.now()}`
+      fs.mkdir(dir_name, ()=>{
+        fs.readdir(dir_name, (error, result)=>{
+          expect(result).toEqual([])
+          resolve()
+        })
+      })
+    })
+    
+    await new Promise((resolve,reject)=>{
+      let dir_name = `dir_not_there_${Date.now()}`
+      fs.readdir(dir_name, (error, result)=>{
+          expect(error.message).toContain(`ENOENT: no such file or directory`)
+          resolve()
+      })
+    })
+
+  })
+  
+
+  test("readdirSync(), mkdirSync()", async () => {
+    const fs = s3fs(BUCKET)
+    let dir_name = `dir_${Date.now()}`
+    try{
+      fs.readdirSync(dir_name)
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+    fs.mkdirSync(dir_name)
+    let contents = fs.readdirSync(dir_name)
+    expect(contents).toEqual([])
+
+  })
+  
+
+  test("readdir(), mkdir() - nested", async () => {
+    const fs = s3fs_promises(BUCKET)
+    let dir_name = `/dir_nested_${Date.now()}`
+
+    await fs.mkdir(`${dir_name}/nested`)
+    
+    contents = await fs.readdir(dir_name)
+    expect(contents).toEqual(['nested'])
+
+    await fs.writeFile(`${dir_name}/file`,Date.now().toString())
+
+    contents = await fs.readdir(dir_name)
+    expect(contents).toEqual(['nested', 'file'])
+
+  })
+  
+
+
 
 })

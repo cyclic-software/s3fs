@@ -74,6 +74,30 @@ class CyclicS3FS extends CyclicS3FSPromises {
     })
   }
   
+  readdir(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        let res = await super.readdir(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
+  mkdir(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        let res = await super.mkdir(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
 
   readFileSync(fileName) {
     return sync_interface.runSync(this,'readFile',[fileName])
@@ -94,6 +118,16 @@ class CyclicS3FS extends CyclicS3FSPromises {
     let res = sync_interface.runSync(this,'stat',[fileName])
     res = v8.deserialize(res)
     return res
+  }
+
+  readdirSync(path) {
+    let res = sync_interface.runSync(this,'readdir',[path])
+    res = v8.deserialize(res)
+    return res
+  }
+
+  mkdirSync(path) {
+    return sync_interface.runSync(this,'mkdir',[path])
   }
 
 }

@@ -3,9 +3,12 @@ const {
   GetObjectCommand, 
   PutObjectCommand,
   HeadObjectCommand,
+  ListObjectsCommand,
+  ListObjectsV2Command
 } = require("@aws-sdk/client-s3");
-
+const _path = require('path')
 const {Stats} = require('fs')
+const util = require('./util')
 const sync_interface = require('./sync_interface');
 function streamToBuffer(stream) {
   return new Promise((resolve, reject) => {
@@ -26,7 +29,7 @@ class CyclicS3FSPromises{
   async readFile(fileName ,options){
     const cmd = new GetObjectCommand({
       Bucket: this.bucket,
-      Key: fileName,
+      Key: util.normalize_path(fileName),
       })
 
     let obj = await this.s3.send(cmd)
@@ -37,7 +40,7 @@ class CyclicS3FSPromises{
   async writeFile(fileName, data, options={}){
     const cmd = new PutObjectCommand({
         Bucket: this.bucket,
-        Key: fileName,
+        Key: util.normalize_path(fileName), 
         Body: data
     })
     await this.s3.send(cmd)
@@ -46,7 +49,7 @@ class CyclicS3FSPromises{
   async exists(fileName, data, options={}){
     const cmd = new HeadObjectCommand({
         Bucket: this.bucket,
-        Key: fileName
+        Key: util.normalize_path(fileName)
     })
     let exists
     try{
@@ -67,7 +70,7 @@ class CyclicS3FSPromises{
   async stat(fileName, data, options={}){
     const cmd = new HeadObjectCommand({
         Bucket: this.bucket,
-        Key: fileName
+        Key: util.normalize_path(fileName)
     })
     let result;
     try{
@@ -96,6 +99,53 @@ class CyclicS3FSPromises{
     }catch(e){
       if(e.name === 'NotFound'){
         throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+      }else{
+        throw e
+      }
+    }
+    return result
+  }
+  
+  async mkdir(path){
+    path = util.normalize_dir(path)
+    const cmd = new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: path,
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        throw e
+    }
+  }
+
+  async readdir(path){
+    path = util.normalize_dir(path)
+    const cmd = new ListObjectsCommand({
+        Bucket: this.bucket,
+        // StartAfter: path,
+        Prefix: path,
+        // Delimiter: '/' 
+        Delimiter: _path.sep 
+    })
+    let result;
+    try{
+        result = await this.s3.send(cmd)
+        if(!result.Contents && !result.CommonPrefixes){
+            throw new Error('NotFound')
+        }
+        let trailing_sep = new RegExp(`${_path.sep}$`)
+
+        let folders = (result.CommonPrefixes || []).map(r=>{
+            return r.Prefix.replace(path, '').replace(trailing_sep, "");
+        })
+        let files = (result.Contents || []).map(r=>{
+            return r.Key.replace(path, '')
+        })
+        result = folders.concat(files).filter(r=>{return r.length})
+    }catch(e){
+      if(e.name === 'NotFound' || e.message === 'NotFound'){
+        throw new Error(`Error: ENOENT: no such file or directory, scandir '${path}'`)
       }else{
         throw e
       }
