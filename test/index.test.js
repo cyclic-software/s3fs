@@ -246,7 +246,7 @@ describe("Basic smoke tests", () => {
   })
   
 
-  test("mkdirSync(), mkdirSync()", async () => {
+  test("readdirSync(), mkdirSync()", async () => {
     const fs = s3fs(BUCKET)
     let dir_name = `dir_${Date.now()}`
     try{
