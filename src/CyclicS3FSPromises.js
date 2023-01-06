@@ -115,11 +115,7 @@ class CyclicS3FSPromises{
     try{
         await this.s3.send(cmd)
     }catch(e){
-      if(e.name === 'NotFound'){
-        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
-      }else{
         throw e
-      }
     }
   }
 
@@ -135,7 +131,11 @@ class CyclicS3FSPromises{
     let result;
     try{
         result = await this.s3.send(cmd)
+        if(!result.Contents){
+            throw new Error('NotFound')
+        }
         let trailing_sep = new RegExp(`${_path.sep}$`)
+
         let folders = (result.CommonPrefixes || []).map(r=>{
             return r.Prefix.replace(path, '').replace(trailing_sep, "");
         })
@@ -144,8 +144,8 @@ class CyclicS3FSPromises{
         })
         result = folders.concat(files).filter(r=>{return r.length})
     }catch(e){
-      if(e.name === 'NotFound'){
-        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+      if(e.name === 'NotFound' || e.message === 'NotFound'){
+        throw new Error(`Error: ENOENT: no such file or directory, scandir '${path}'`)
       }else{
         throw e
       }
