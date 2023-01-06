@@ -142,7 +142,7 @@ class CyclicS3FSPromises{
         let files = (result.Contents || []).map(r=>{
             return r.Key.replace(path, '')
         })
-        result = folders.concat(files)
+        result = folders.concat(files).filter(r=>{return r.length})
     }catch(e){
       if(e.name === 'NotFound'){
         throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)

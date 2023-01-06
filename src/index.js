@@ -96,6 +96,16 @@ class CyclicS3FS extends CyclicS3FSPromises {
     return res
   }
 
+  readdirSync(path) {
+    let res = sync_interface.runSync(this,'readdir',[path])
+    res = v8.deserialize(res)
+    return res
+  }
+
+  mkdirSync(path) {
+    return sync_interface.runSync(this,'mkdir',[path])
+  }
+
 }
 
 

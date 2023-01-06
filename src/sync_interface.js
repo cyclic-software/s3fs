@@ -51,7 +51,7 @@ const run = async function(bucket, config, method, args){
     const fs = new CyclicS3FSPromises(bucket, config)
     let result = await fs[method](...args)
     if(typeof result !== 'undefined'){
-        if(['stat','exists'].includes(method)){
+        if(['stat','exists','readdir'].includes(method)){
             result = v8.serialize(result)
         }
         process.stdout.write(result);
