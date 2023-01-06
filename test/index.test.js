@@ -1,4 +1,4 @@
-const fs = require("fs")
+
 const path = require("path")
 const BUCKET = process.env.BUCKET
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
@@ -8,6 +8,7 @@ const s3fs = require("../src")
 const s3fs_promises = require("../src/promises")
 
 beforeAll(async () => {
+  const fs = require("fs")
   console.log('preparing test')
   try{
 
@@ -223,6 +224,7 @@ describe("Basic smoke tests", () => {
   
 
   test("mkdir(), readdir() - callback", async () => {
+    const fs = s3fs(BUCKET)
     await new Promise((resolve,reject)=>{
       let dir_name = `dir_${Date.now()}`
       fs.mkdir(dir_name, ()=>{
