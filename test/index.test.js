@@ -13,13 +13,13 @@ beforeAll(async () => {
 
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
-      Key: 'test/_read.json',
+      Key: `${path.resolve(__dirname,'./_read.json').replace(new RegExp(`^${path.sep}+`, 'g'), '')}`,
       Body: fs.readFileSync(path.resolve(__dirname,'./_read.json')),
       ContentType: 'application/json'
     }))
     await s3.send(new PutObjectCommand({
       Bucket: BUCKET,
-      Key: 'test/_read.jpeg',
+      Key: `${path.resolve(__dirname,'./_read.jpeg').replace(new RegExp(`^${path.sep}+`, 'g'), '')}`,
       Body: fs.readFileSync(path.resolve(__dirname,'./_read.jpeg')),
       ContentType: 'image/jpeg'
     }))

@@ -3,6 +3,8 @@ const {
   GetObjectCommand, 
   PutObjectCommand,
   HeadObjectCommand,
+  ListObjectsCommand,
+  ListObjectsV2Command
 } = require("@aws-sdk/client-s3");
 const _path = require('path')
 const {Stats} = require('fs')
@@ -27,7 +29,7 @@ class CyclicS3FSPromises{
   async readFile(fileName ,options){
     const cmd = new GetObjectCommand({
       Bucket: this.bucket,
-      Key: fileName,
+      Key: util.normalize_path(fileName),
       })
 
     let obj = await this.s3.send(cmd)
@@ -38,7 +40,7 @@ class CyclicS3FSPromises{
   async writeFile(fileName, data, options={}){
     const cmd = new PutObjectCommand({
         Bucket: this.bucket,
-        Key: fileName,
+        Key: util.normalize_path(fileName), 
         Body: data
     })
     await this.s3.send(cmd)
@@ -47,7 +49,7 @@ class CyclicS3FSPromises{
   async exists(fileName, data, options={}){
     const cmd = new HeadObjectCommand({
         Bucket: this.bucket,
-        Key: fileName
+        Key: util.normalize_path(fileName)
     })
     let exists
     try{
@@ -68,7 +70,7 @@ class CyclicS3FSPromises{
   async stat(fileName, data, options={}){
     const cmd = new HeadObjectCommand({
         Bucket: this.bucket,
-        Key: fileName
+        Key: util.normalize_path(fileName)
     })
     let result;
     try{
@@ -105,12 +107,11 @@ class CyclicS3FSPromises{
   }
   
   async mkdir(path){
-    path = util.normalize_path(path)
+    path = util.normalize_dir(path)
     const cmd = new PutObjectCommand({
         Bucket: this.bucket,
-        Key: `s3fs:${path}`,
+        Key: path,
     })
-    
     try{
         await this.s3.send(cmd)
     }catch(e){
@@ -120,7 +121,36 @@ class CyclicS3FSPromises{
         throw e
       }
     }
-    // return result
+  }
+
+  async readdir(path){
+    path = util.normalize_dir(path)
+    const cmd = new ListObjectsCommand({
+        Bucket: this.bucket,
+        // StartAfter: path,
+        Prefix: path,
+        // Delimiter: '/' 
+        Delimiter: _path.sep 
+    })
+    let result;
+    try{
+        result = await this.s3.send(cmd)
+        let trailing_sep = new RegExp(`${_path.sep}$`)
+        let folders = (result.CommonPrefixes || []).map(r=>{
+            return r.Prefix.replace(path, '').replace(trailing_sep, "");
+        })
+        let files = (result.Contents || []).map(r=>{
+            return r.Key.replace(path, '')
+        })
+        result = folders.concat(files)
+    }catch(e){
+      if(e.name === 'NotFound'){
+        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+      }else{
+        throw e
+      }
+    }
+    return result
   }
 
 }
