@@ -131,7 +131,7 @@ class CyclicS3FSPromises{
     let result;
     try{
         result = await this.s3.send(cmd)
-        if(!result.Contents){
+        if(!result.Contents && !result.CommonPrefixes){
             throw new Error('NotFound')
         }
         let trailing_sep = new RegExp(`${_path.sep}$`)

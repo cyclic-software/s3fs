@@ -74,6 +74,30 @@ class CyclicS3FS extends CyclicS3FSPromises {
     })
   }
   
+  readdir(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        let res = await super.readdir(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
+  mkdir(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        let res = await super.mkdir(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
 
   readFileSync(fileName) {
     return sync_interface.runSync(this,'readFile',[fileName])

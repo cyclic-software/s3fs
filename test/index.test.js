@@ -206,11 +206,76 @@ describe("Basic smoke tests", () => {
   })
 
 
-  test("mkdir() - promises", async () => {
+  test("mkdir(), readdir() - promises", async () => {
     const fs = s3fs_promises(BUCKET)
-    await fs.mkdir('dir')
+    let dir_name = `dir_${Date.now()}`
+    try{
+      let d = await fs.readdir(dir_name)
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    await fs.mkdir(dir_name)
     
+    let d = await fs.readdir(dir_name)
+    expect(d).toEqual([])
+
   })
   
+
+  test("mkdir(), readdir() - callback", async () => {
+    await new Promise((resolve,reject)=>{
+      let dir_name = `dir_${Date.now()}`
+      fs.mkdir(dir_name, ()=>{
+        fs.readdir(dir_name, (error, result)=>{
+          expect(result).toEqual([])
+          resolve()
+        })
+      })
+    })
+    
+    await new Promise((resolve,reject)=>{
+      let dir_name = `dir_not_there_${Date.now()}`
+      fs.readdir(dir_name, (error, result)=>{
+          expect(error.message).toContain(`ENOENT: no such file or directory`)
+          resolve()
+      })
+    })
+
+  })
+  
+
+  test("mkdirSync(), mkdirSync()", async () => {
+    const fs = s3fs(BUCKET)
+    let dir_name = `dir_${Date.now()}`
+    try{
+      fs.readdirSync(dir_name)
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+    fs.mkdirSync(dir_name)
+    let contents = fs.readdirSync(dir_name)
+    expect(contents).toEqual([])
+
+  })
+  
+
+  test("readdir(), mkdir() - nested", async () => {
+    const fs = s3fs_promises(BUCKET)
+    let dir_name = `/dir_nested_${Date.now()}`
+
+    await fs.mkdir(`${dir_name}/nested`)
+    
+    contents = await fs.readdir(dir_name)
+    expect(contents).toEqual(['nested'])
+
+    await fs.writeFile(`${dir_name}/file`,Date.now().toString())
+
+    contents = await fs.readdir(dir_name)
+    expect(contents).toEqual(['nested', 'file'])
+
+  })
+  
+
+
 
 })
