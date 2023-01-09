@@ -14,42 +14,15 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
 
 ## Supported methods
 `@cyclic.sh/s3fs` supports the following `fs` methods operating on AWS S3:
-- [x] fs.writeFile(filename, data, [options], callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.readFile(filename, [options], callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.exists(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.readdir(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.mkdir(path, [mode], callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.stat(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.rmdir(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.rm(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.unlink(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
+- writeFile / writeFileSync
+- readFile / readFileSync
+- exists / existsSync
+- rm / rmSync
+- stat / statSync
+- unlink / unlinkSync
+- readdir / readdirSync
+- mkdir / mkdirSync
+- rmdir / rmdirSync
 
 ## Example Usage
 ### Authentication
