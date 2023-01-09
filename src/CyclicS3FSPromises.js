@@ -5,7 +5,9 @@ const {
   HeadObjectCommand,
   ListObjectsCommand,
   ListObjectsV2Command,
-  DeleteObjectCommand
+  ListObjectVersionsCommand,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
 } = require("@aws-sdk/client-s3");
 const _path = require('path')
 const {Stats} = require('fs')
@@ -188,7 +190,6 @@ class CyclicS3FSPromises{
   async rmdir(path){
     try{
         let contents =  await this.readdir(path)
-        console.log(contents)
         if(contents.length){
             throw new Error(`ENOTEMPTY: directory not empty, rmdir '${path}'`)
         }
@@ -197,7 +198,6 @@ class CyclicS3FSPromises{
     }
 
     path = util.normalize_dir(path)
-    console.log(path)
     const cmd = new DeleteObjectCommand({
         Bucket: this.bucket,
         Key: path
@@ -236,8 +236,54 @@ class CyclicS3FSPromises{
     }catch(e){
         throw e
     }
-    
   }
+
+
+  async deleteVersionMarkers(NextKeyMarker, list=[] ){
+        if (NextKeyMarker || list.length === 0) {
+          return await this.s3.send(new ListObjectVersionsCommand({
+            Bucket: this.bucket,
+            NextKeyMarker
+          })).then(async ({ DeleteMarkers, Versions, NextKeyMarker }) => {
+              if (DeleteMarkers && DeleteMarkers.length) {
+                await this.s3.send(new DeleteObjectsCommand({
+                  Bucket: this.bucket,
+                  Delete: {
+                    Objects: DeleteMarkers.map((item) => ({
+                      Key: item.Key,
+                      VersionId: item.VersionId,
+                    })),
+                  },
+                }))
+
+                return await this.deleteVersionMarkers(NextKeyMarker, [
+                  ...list,
+                  ...DeleteMarkers.map((item) => item.Key),
+                ]);
+              }
+
+              if (Versions && Versions.length) {
+                await this.s3.send(new DeleteObjectsCommand({
+                    Bucket: this.bucket,
+                    Delete: {
+                      Objects: Versions.map((item) => ({
+                        Key: item.Key,
+                        VersionId: item.VersionId,
+                      })),
+                    },
+                  }))
+                return await this.deleteVersionMarkers(NextKeyMarker, [
+                  ...list,
+                  ...Versions.map((item) => item.Key),
+                ]);
+              }
+              return list;
+            });
+        }
+        return list;
+      };
+
+      
 
 }
 

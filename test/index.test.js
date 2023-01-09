@@ -1,11 +1,19 @@
 
 const path = require("path")
 const BUCKET = process.env.BUCKET
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { 
+   S3Client,
+   PutObjectCommand,
+  } = require("@aws-sdk/client-s3");
 const s3 = new S3Client({});
 
 const s3fs = require("../src")
 const s3fs_promises = require("../src/promises")
+
+afterAll(async () => {
+  let markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
+  expect(markers.length > 10)
+})
 
 beforeAll(async () => {
   const fs = require("fs")
@@ -484,6 +492,18 @@ describe("Basic smoke tests", () => {
 
 
   test("rmdirSync() - not empty", async () => {
+    const fs = s3fs(BUCKET)
+    let dir_name = `/nested/dir_${Date.now()}`
+    fs.mkdirSync(dir_name)
+    try{
+      fs.rmdirSync('/nested')
+    }catch(e){
+      expect(e).toContain(`ENOTEMPTY: directory not empty, rmdir`)
+    }
+
+  })
+
+  test("empty_bucket", async () => {
     const fs = s3fs(BUCKET)
     let dir_name = `/nested/dir_${Date.now()}`
     fs.mkdirSync(dir_name)
