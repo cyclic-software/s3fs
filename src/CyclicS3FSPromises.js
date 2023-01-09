@@ -4,7 +4,10 @@ const {
   PutObjectCommand,
   HeadObjectCommand,
   ListObjectsCommand,
-  ListObjectsV2Command
+  ListObjectsV2Command,
+  ListObjectVersionsCommand,
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
 } = require("@aws-sdk/client-s3");
 const _path = require('path')
 const {Stats} = require('fs')
@@ -68,9 +71,10 @@ class CyclicS3FSPromises{
   }
   
   async stat(fileName, data, options={}){
+    fileName = util.normalize_path(fileName)
     const cmd = new HeadObjectCommand({
         Bucket: this.bucket,
-        Key: util.normalize_path(fileName)
+        Key: fileName
     })
     let result;
     try{
@@ -98,7 +102,7 @@ class CyclicS3FSPromises{
         }));
     }catch(e){
       if(e.name === 'NotFound'){
-        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+        throw new Error(`ENOENT: no such file or directory, stat '${fileName}'`)
       }else{
         throw e
       }
@@ -121,7 +125,7 @@ class CyclicS3FSPromises{
 
   async readdir(path){
     path = util.normalize_dir(path)
-    const cmd = new ListObjectsCommand({
+    const cmd = new ListObjectsV2Command({
         Bucket: this.bucket,
         // StartAfter: path,
         Prefix: path,
@@ -145,13 +149,141 @@ class CyclicS3FSPromises{
         result = folders.concat(files).filter(r=>{return r.length})
     }catch(e){
       if(e.name === 'NotFound' || e.message === 'NotFound'){
-        throw new Error(`Error: ENOENT: no such file or directory, scandir '${path}'`)
+        throw new Error(`ENOENT: no such file or directory, scandir '${path}'`)
       }else{
         throw e
       }
     }
     return result
   }
+
+  async rm(path){
+    try{
+        let f = await Promise.allSettled([
+            this.stat(path),
+            this.readdir(path)
+        ])
+
+        if(f[0].status == 'rejected' && f[1].status == 'fulfilled'){
+            throw new Error(`SystemError [ERR_FS_EISDIR]: Path is a directory: rm returned EISDIR (is a directory) ${path}`)
+        }
+        if(f[0].status == 'rejected' && f[1].status == 'rejected'){
+            throw f[0].reason
+        }
+
+    }catch(e){
+        throw e
+    }
+    path = util.normalize_path(path)
+    const cmd = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        throw e
+    }
+    
+  }
+  
+  async rmdir(path){
+    try{
+        let contents =  await this.readdir(path)
+        if(contents.length){
+            throw new Error(`ENOTEMPTY: directory not empty, rmdir '${path}'`)
+        }
+    }catch(e){
+        throw e
+    }
+
+    path = util.normalize_dir(path)
+    const cmd = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        throw e
+    }
+  }
+
+  async unlink(path){
+    try{
+        let f = await Promise.allSettled([
+            this.stat(path),
+            this.readdir(path)
+        ])
+
+        if(f[0].status == 'rejected' && f[1].status == 'fulfilled'){
+            throw new Error(`EPERM: operation not permitted, unlink '${path}'`)
+        }
+        if(f[0].status == 'rejected' && f[1].status == 'rejected'){
+            throw f[0].reason
+        }
+
+    }catch(e){
+        throw e
+    }
+    path = util.normalize_path(path)
+    const cmd = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        throw e
+    }
+  }
+
+
+  async deleteVersionMarkers(NextKeyMarker, list=[] ){
+        if (NextKeyMarker || list.length === 0) {
+          return await this.s3.send(new ListObjectVersionsCommand({
+            Bucket: this.bucket,
+            NextKeyMarker
+          })).then(async ({ DeleteMarkers, Versions, NextKeyMarker }) => {
+              if (DeleteMarkers && DeleteMarkers.length) {
+                await this.s3.send(new DeleteObjectsCommand({
+                  Bucket: this.bucket,
+                  Delete: {
+                    Objects: DeleteMarkers.map((item) => ({
+                      Key: item.Key,
+                      VersionId: item.VersionId,
+                    })),
+                  },
+                }))
+
+                return await this.deleteVersionMarkers(NextKeyMarker, [
+                  ...list,
+                  ...DeleteMarkers.map((item) => item.Key),
+                ]);
+              }
+
+              if (Versions && Versions.length) {
+                await this.s3.send(new DeleteObjectsCommand({
+                    Bucket: this.bucket,
+                    Delete: {
+                      Objects: Versions.map((item) => ({
+                        Key: item.Key,
+                        VersionId: item.VersionId,
+                      })),
+                    },
+                  }))
+                return await this.deleteVersionMarkers(NextKeyMarker, [
+                  ...list,
+                  ...Versions.map((item) => item.Key),
+                ]);
+              }
+              return list;
+            });
+        }
+        return list;
+      };
+
+      
 
 }
 

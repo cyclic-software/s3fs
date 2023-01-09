@@ -10,7 +10,6 @@ function makeCallback(cb) {
   if (cb === undefined) {
     return rethrow();
   }
-
   if (typeof cb !== 'function') {
     throw new TypeError('callback must be a function');
   }
@@ -98,6 +97,48 @@ class CyclicS3FS extends CyclicS3FSPromises {
     })
   }
   
+  rm(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        this.stat = super.stat
+        this.readdir = super.readdir
+        let res = await super.rm(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
+  unlink(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        this.stat = super.stat
+        this.readdir = super.readdir
+        let res = await super.unlink(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
+  rmdir(path, callback) {
+    callback = makeCallback(arguments[arguments.length - 1]);
+    new Promise(async (resolve,reject)=>{
+      try{
+        this.stat = super.stat
+        this.readdir = super.readdir
+        let res = await super.rmdir(...arguments)
+        return resolve(callback(null,res))
+      }catch(e){
+        return resolve(callback(e))
+      }
+    })
+  }
+  
 
   readFileSync(fileName) {
     return sync_interface.runSync(this,'readFile',[fileName])
@@ -128,6 +169,18 @@ class CyclicS3FS extends CyclicS3FSPromises {
 
   mkdirSync(path) {
     return sync_interface.runSync(this,'mkdir',[path])
+  }
+
+  rmSync(path) {
+    return sync_interface.runSync(this,'rm',[path])
+  }
+
+  unlinkSync(path) {
+    return sync_interface.runSync(this,'unlink',[path])
+  }
+
+  rmdirSync(path) {
+    return sync_interface.runSync(this,'rmdir',[path])
   }
 
 }

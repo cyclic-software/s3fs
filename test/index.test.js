@@ -1,11 +1,27 @@
 
 const path = require("path")
 const BUCKET = process.env.BUCKET
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const { 
+   S3Client,
+   PutObjectCommand,
+  } = require("@aws-sdk/client-s3");
 const s3 = new S3Client({});
 
 const s3fs = require("../src")
 const s3fs_promises = require("../src/promises")
+
+afterAll(async () => {
+  let markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
+  expect(markers.length > 10)
+
+  // need to run twice because need to delete the delete markers 
+  markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
+  expect(markers.length > 10)
+  
+  // now should be empty
+  markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
+  expect(markers.length == 0)
+})
 
 beforeAll(async () => {
   const fs = require("fs")
@@ -276,7 +292,235 @@ describe("Basic smoke tests", () => {
     expect(contents).toEqual(['nested', 'file'])
 
   })
+
+  test("rm() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    try{
+      await fs.rm('test/not_there.json')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    await fs.writeFile('test/aaa.txt','asdfsdf')
+    await fs.rm('test/aaa.txt')
+
+    try{
+      await fs.stat('test/aaa.txt')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+  })
   
+  test("rmSync()", async () => {
+    const fs = s3fs(BUCKET)
+    try{
+      fs.rmSync('test/not_there.json')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    fs.rmSync('test/aaa.txt')
+
+    try{
+      await fs.statSync('test/aaa.txt')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+
+
+  test("rm() - callback", async () => {
+    
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      fs.rm('test/not_there.txt', (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    
+    await new Promise((resolve,reject)=>{
+      fs.rm('test/aaa.txt',(error,data)=>{
+        expect(error).toEqual(null)
+        resolve()
+      })
+    })
+  })
+
+  test("rmSync(directory)", async () => {
+    const fs = s3fs(BUCKET)
+    fs.mkdirSync('/dir')
+
+    try{
+      fs.rmSync('/dir')
+    }catch(e){
+      expect(e).toContain(`[ERR_FS_EISDIR]: Path is a directory: rm returned EISDIR (is a directory)`)
+    }
+
+  })
+
+  test("unlink() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    try{
+      await fs.rm('test/not_there.json')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    await fs.writeFile('test/aaa.txt','asdfsdf')
+    await fs.unlink('test/aaa.txt')
+
+    try{
+      await fs.stat('test/aaa.txt')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+  
+  test("unlinkSync()", async () => {
+    const fs = s3fs(BUCKET)
+    try{
+      fs.unlinkSync('test/not_there.json')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    fs.unlinkSync('test/aaa.txt')
+
+    try{
+      await fs.statSync('test/aaa.txt')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+
+
+  test("unlink() - callback", async () => {
+    
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      fs.unlink('test/not_there.txt', (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    
+    await new Promise((resolve,reject)=>{
+      fs.unlink('test/aaa.txt',(error,data)=>{
+        expect(error).toEqual(null)
+        resolve()
+      })
+    })
+  })
+
+
+  test("unlinkSync(directory)", async () => {
+    const fs = s3fs(BUCKET)
+    fs.mkdirSync('/dir')
+
+    try{
+      fs.unlinkSync('/dir')
+    }catch(e){
+      expect(e).toContain(`EPERM: operation not permitted, unlink`)
+    }
+
+  })
+
+
+  
+  test("rmdir() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    try{
+      await fs.rmdir('not_there')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    let dir_name = `dir_${Date.now()}`
+    await fs.mkdir(dir_name)
+    await fs.rmdir(dir_name)
+
+    try{
+      await fs.readdir(dir_name)
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+  
+  test("rmdirSync()", async () => {
+    const fs = s3fs(BUCKET)
+    try{
+      fs.rmdirSync('not_there')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+    let dir_name = `dir_${Date.now()}`
+    fs.mkdirSync(dir_name)
+    fs.rmdirSync(dir_name)
+
+    try{
+      fs.readdirSync(dir_name)
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+
+
+  test("rmdir() - callback", async () => {
+    
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      fs.rmdir('not_there', (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+    let dir_name = `/dir_${Date.now()}`
+
+    fs.mkdirSync(dir_name)
+    await new Promise((resolve,reject)=>{
+      fs.rmdir(dir_name,(error,data)=>{
+        expect(error).toEqual(null)
+        resolve()
+      })
+    })
+
+    await new Promise((resolve,reject)=>{
+      fs.rmdir(dir_name, (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+
+  })
+
+
+
+  test("rmdirSync() - not empty", async () => {
+    const fs = s3fs(BUCKET)
+    let dir_name = `/nested/dir_${Date.now()}`
+    fs.mkdirSync(dir_name)
+    try{
+      fs.rmdirSync('/nested')
+    }catch(e){
+      expect(e).toContain(`ENOTEMPTY: directory not empty, rmdir`)
+    }
+
+  })
+
+  test("empty_bucket", async () => {
+    const fs = s3fs(BUCKET)
+    let dir_name = `/nested/dir_${Date.now()}`
+    fs.mkdirSync(dir_name)
+    try{
+      fs.rmdirSync('/nested')
+    }catch(e){
+      expect(e).toContain(`ENOTEMPTY: directory not empty, rmdir`)
+    }
+
+  })
+
 
 
 

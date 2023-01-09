@@ -2,6 +2,26 @@
 
 Drop in replacement for the Node.js `fs` library backed by AWS S3.
 
+## Supported methods
+`@cyclic.sh/s3fs` supports the following `fs` methods operating on AWS S3:
+- writeFile / writeFileSync
+- readFile / readFileSync
+- exists / existsSync
+- rm / rmSync
+- stat / statSync
+- unlink / unlinkSync
+- readdir / readdirSync
+- mkdir / mkdirSync
+- rmdir / rmdirSync
+
+## Example Usage
+### Installation
+
+```
+npm install @cyclic.sh/s3fs
+```
+
+
 Require in the same format as Node.js `fs`, specifying an S3 Bucket: 
 - Callbacks and Sync methods:
   ```js
@@ -12,42 +32,14 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
   const fs = require('@cyclic.sh/s3fs/promises')(S3_BUCKET_NAME)
   ```
 
-## Supported methods
-`@cyclic.sh/s3fs` supports the following `fs` methods operating on AWS S3:
-- [x] fs.writeFile(filename, data, [options], callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.readFile(filename, [options], callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.exists(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.readdir(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.mkdir(path, [mode], callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [x] fs.stat(path, callback)
-  - [x] promise
-  - [x] cb
-  - [x] sync
-- [ ] fs.rmdir(path, callback)
-- [ ] fs.rm(path, callback)
-- [ ] fs.unlink(path, callback)
-- [ ] fs.lstat(path, callback)
-- [ ] fs.createReadStream(path, [options])
-- [ ] fs.createWriteStream(path, [options])
-
-## Example Usage
 ### Authentication
-Authenticating the client can be done with one of two ways:
+
+Authenticating the client:
+- **cyclic.sh** -  
+  - When deploying on <a href="https://cyclic.sh" target="_blank">cyclic.sh</a>, credentials are already available in the environment 
+  - The bucket name is also available under the `CYCLIC_BUCKET_NAME` variable
+  - read more: <a href="https://docs.cyclic.sh/concepts/env_vars#cyclic" target="_blank">Cyclic Environment Variables</a>
+- **Local Mode** - When no credentials are available - the client will fall back to using `fs` and the local filesystem with a warning.
 - **Environment Variables** - the internal S3 client will use AWS credentials if set in the environment
   ```
   AWS_REGION
@@ -62,9 +54,6 @@ Authenticating the client can be done with one of two ways:
           credentials: {...}
       })
   ```    
-- **Local Mode** - When no credentials are available - the client will fall back to using `fs` and the local filesystem with a warning.
-
-
 ### Using Methods
 The supported methods have the same API as Node.js `fs`:
 - Sync
@@ -86,8 +75,3 @@ The supported methods have the same API as Node.js `fs`:
       const json = JSON.parse(await fs.readFile('test/_read.json'))
     }
   ```
-
-refer to fs, s3fs:
-
-- https://github.com/TooTallNate/s3fs
-- https://nodejs.org/docs/latest-v0.10.x/api/fs.html#fs_fs_mkdir_path_mode_callback
