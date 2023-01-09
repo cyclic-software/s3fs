@@ -36,7 +36,10 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
 
 Authenticating the client:
 - **Local Mode** - When no credentials are available - the client will fall back to using `fs` and the local filesystem with a warning.
-
+- **<a href="https://cyclic.sh" target="_blank">cyclic.sh</a>**
+  - When deploying on <a href="https://cyclic.sh" target="_blank">cyclic.sh</a>, these credentials are already available in the environment. 
+  - The bucket name is also available under the `CYCLIC_BUCKET_NAME` variable
+  - read more: <a href="https://docs.cyclic.sh/concepts/env_vars#cyclic" target="_blank">Cyclic Environment Variables</a>
 - **Environment Variables** - the internal S3 client will use AWS credentials if set in the environment
   ```
   AWS_REGION
@@ -44,9 +47,6 @@ Authenticating the client:
   AWS_SECRET_KEY
   AWS_SECRET_ACCESS_KEY
   ```
-  > - When deploying on <a href="https://cyclic.sh" target="_blank">cyclic.sh</a>, these credentials are already available in the environment. 
-  > - The bucket name is also available under the `CYCLIC_BUCKET_NAME` variable
-  > - read more: <a href="https://docs.cyclic.sh/concepts/env_vars#cyclic" target="_blank">Cyclic Environment Variables</a>
 - **Client Credentials** - the library also accepts standard S3 client parameters at initialization:
   ```js
   const fs = require('@cyclic.sh/s3fs')(S3_BUCKET_NAME, {
