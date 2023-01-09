@@ -100,7 +100,7 @@ class CyclicS3FSPromises{
         }));
     }catch(e){
       if(e.name === 'NotFound'){
-        throw new Error(`Error: ENOENT: no such file or directory, stat '${fileName}'`)
+        throw new Error(`ENOENT: no such file or directory, stat '${fileName}'`)
       }else{
         throw e
       }
@@ -147,7 +147,7 @@ class CyclicS3FSPromises{
         result = folders.concat(files).filter(r=>{return r.length})
     }catch(e){
       if(e.name === 'NotFound' || e.message === 'NotFound'){
-        throw new Error(`Error: ENOENT: no such file or directory, scandir '${path}'`)
+        throw new Error(`ENOENT: no such file or directory, scandir '${path}'`)
       }else{
         throw e
       }
@@ -157,7 +157,18 @@ class CyclicS3FSPromises{
 
   async rm(path){
     try{
-          let f = await this.stat(path)
+        let f = await Promise.allSettled([
+            this.stat(path),
+            this.readdir(path)
+        ])
+
+        if(f[0].status == 'rejected' && f[1].status == 'fulfilled'){
+            throw new Error(`SystemError [ERR_FS_EISDIR]: Path is a directory: rm returned EISDIR (is a directory) ${path}`)
+        }
+        if(f[0].status == 'rejected' && f[1].status == 'rejected'){
+            throw f[0].reason
+        }
+
     }catch(e){
         throw e
     }
@@ -175,15 +186,17 @@ class CyclicS3FSPromises{
   }
 
   
-//   async rmdir(path){
-//     path = util.normalize_dir(path)
-//     try{
-//         let await readdir(path)
-//         // await this.s3.send(cmd)
-//     }catch(e){
-//         throw e
-//     }
-//   }
+  async rmdir(path){
+    try{
+        let contents =  await this.readdir(path)
+        if(contents.length){
+            throw new Error(`ENOTEMPTY: directory not empty, rmdir '${path}'`)
+        }
+    }catch(e){
+        throw e
+    }
+        // path = util.normalize_dir(path)
+  }
 
 }
 

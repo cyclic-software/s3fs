@@ -330,11 +330,20 @@ describe("Basic smoke tests", () => {
         resolve()
       })
     })
+  })
 
+  test("rmSync(directory)", async () => {
+    const fs = s3fs(BUCKET)
+    fs.mkdirSync('/dir')
 
-
+    try{
+      fs.rmSync('/dir')
+    }catch(e){
+      expect(e).toContain(`[ERR_FS_EISDIR]: Path is a directory: rm returned EISDIR (is a directory)`)
+    }
 
   })
+
 
   
 

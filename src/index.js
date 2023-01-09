@@ -102,6 +102,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
     new Promise(async (resolve,reject)=>{
       try{
         this.stat = super.stat
+        this.readdir = super.readdir
         let res = await super.rm(...arguments)
         return resolve(callback(null,res))
       }catch(e){
