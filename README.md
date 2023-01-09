@@ -4,7 +4,7 @@ Drop in replacement for the Node.js `fs` library backed by AWS S3.
 
 [![Discord](https://img.shields.io/discord/895292239633338380)](https://discord.cyclic.sh/support) [![CI](https://github.com/cyclic-software/s3fs/actions/workflows/run_tests.yaml/badge.svg)](https://github.com/cyclic-software/s3fs/actions/workflows/run_tests.yaml) [![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)
 
-[![npm (scoped)](https://img.shields.io/npm/v/@cyclic.sh/s3fs)](https://www.npmjs.com/package/@cyclic.sh/s3fs) ![node-current (scoped)](https://img.shields.io/node/v/@cyclic.sh/s3fs) ![npm bundle size (scoped)](https://img.shields.io/bundlephobia/minzip/@cyclic.sh/s3fs)
+[![npm (scoped)](https://img.shields.io/npm/v/@cyclic.sh/s3fs)](https://www.npmjs.com/package/@cyclic.sh/s3fs) ![node-current (scoped)](https://img.shields.io/node/v/@cyclic.sh/s3fs) ![code size](https://img.shields.io/github/languages/code-size/cyclic-software/s3fs)
 
 <!-- [![@cyclic.sh/s3fs](https://snyk.io/advisor/npm-package/@cyclic.sh/s3fs/badge.svg)](https://snyk.io/advisor/npm-package/@cyclic.sh/s3fs) -->
 
