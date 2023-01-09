@@ -180,22 +180,33 @@ class CyclicS3FSPromises{
     try{
         await this.s3.send(cmd)
     }catch(e){
-        console.error(e)
+        throw e
     }
     
   }
-
   
   async rmdir(path){
     try{
         let contents =  await this.readdir(path)
+        console.log(contents)
         if(contents.length){
             throw new Error(`ENOTEMPTY: directory not empty, rmdir '${path}'`)
         }
     }catch(e){
         throw e
     }
-        // path = util.normalize_dir(path)
+
+    path = util.normalize_dir(path)
+    console.log(path)
+    const cmd = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        throw e
+    }
   }
 
 }

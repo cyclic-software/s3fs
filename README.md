@@ -38,8 +38,14 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
   - [x] promise
   - [x] cb
   - [x] sync
-- [ ] fs.rmdir(path, callback)
-- [ ] fs.rm(path, callback)
+- [x] fs.rmdir(path, callback)
+  - [x] promise
+  - [x] cb
+  - [x] sync
+- [x] fs.rm(path, callback)
+  - [x] promise
+  - [x] cb
+  - [x] sync
 - [ ] fs.unlink(path, callback)
 - [ ] fs.createReadStream(path, [options])
 - [ ] fs.createWriteStream(path, [options])

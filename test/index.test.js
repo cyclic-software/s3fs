@@ -346,6 +346,87 @@ describe("Basic smoke tests", () => {
 
 
   
+  test("rmdir() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    try{
+      await fs.rmdir('not_there')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    let dir_name = `dir_${Date.now()}`
+    await fs.mkdir(dir_name)
+    await fs.rmdir(dir_name)
+
+    try{
+      await fs.readdir(dir_name)
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+  
+  test("rmdirSync()", async () => {
+    const fs = s3fs(BUCKET)
+    try{
+      fs.rmdirSync('not_there')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+    let dir_name = `dir_${Date.now()}`
+    fs.mkdirSync(dir_name)
+    fs.rmdirSync(dir_name)
+
+    try{
+      fs.readdirSync(dir_name)
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+
+
+  test("rmdir() - callback", async () => {
+    
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      fs.rmdir('not_there', (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+    let dir_name = `/dir_${Date.now()}`
+
+    fs.mkdirSync(dir_name)
+    await new Promise((resolve,reject)=>{
+      fs.rmdir(dir_name,(error,data)=>{
+        expect(error).toEqual(null)
+        resolve()
+      })
+    })
+
+    await new Promise((resolve,reject)=>{
+      fs.rmdir(dir_name, (error,data) =>{
+        console.log(error)
+        console.log(data)
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+
+  })
+
+
+
+  test("rmdirSync() - not empty", async () => {
+    const fs = s3fs(BUCKET)
+    let dir_name = `/nested/dir_${Date.now()}`
+    fs.mkdirSync(dir_name)
+    try{
+      fs.rmdirSync('/nested')
+    }catch(e){
+      expect(e).toContain(`ENOTEMPTY: directory not empty, rmdir`)
+    }
+
+  })
+
 
 
 
