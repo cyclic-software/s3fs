@@ -35,7 +35,7 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
 ### Authentication
 
 Authenticating the client:
-- **cyclic.sh** 
+- **cyclic.sh** - 
   - When deploying on <a href="https://cyclic.sh" target="_blank">cyclic.sh</a>, credentials are already available in the environment 
   - The bucket name is also available under the `CYCLIC_BUCKET_NAME` variable
   - read more: <a href="https://docs.cyclic.sh/concepts/env_vars#cyclic" target="_blank">Cyclic Environment Variables</a>
