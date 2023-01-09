@@ -13,6 +13,14 @@ const s3fs_promises = require("../src/promises")
 afterAll(async () => {
   let markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
   expect(markers.length > 10)
+
+  // need to run twice because need to delete the delete markers 
+  markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
+  expect(markers.length > 10)
+  
+  // now should be empty
+  markers = await s3fs_promises(BUCKET).deleteVersionMarkers()
+  expect(markers.length == 0)
 })
 
 beforeAll(async () => {
@@ -480,8 +488,6 @@ describe("Basic smoke tests", () => {
 
     await new Promise((resolve,reject)=>{
       fs.rmdir(dir_name, (error,data) =>{
-        console.log(error)
-        console.log(data)
         expect(error.message).toContain(`ENOENT: no such file or directory`)
         resolve()
       })
