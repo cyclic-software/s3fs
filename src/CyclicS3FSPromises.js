@@ -157,7 +157,7 @@ class CyclicS3FSPromises{
 
   async rm(path){
     try{
-        let f = await this.stat(path)
+          let f = await this.stat(path)
     }catch(e){
         throw e
     }

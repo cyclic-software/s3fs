@@ -276,6 +276,66 @@ describe("Basic smoke tests", () => {
     expect(contents).toEqual(['nested', 'file'])
 
   })
+
+  test("rm() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    try{
+      await fs.rm('test/not_there.json')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    await fs.writeFile('test/aaa.txt','asdfsdf')
+    await fs.rm('test/aaa.txt')
+
+    try{
+      await fs.stat('test/aaa.txt')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+  
+  test("rmSync()", async () => {
+    const fs = s3fs(BUCKET)
+    try{
+      fs.rmSync('test/not_there.json')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    fs.rmSync('test/aaa.txt')
+
+    try{
+      await fs.statSync('test/aaa.txt')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+
+
+  test("rm() - callback", async () => {
+    
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      fs.rm('test/not_there.txt', (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    
+    await new Promise((resolve,reject)=>{
+      fs.rm('test/aaa.txt',(error,data)=>{
+        expect(error).toEqual(null)
+        resolve()
+      })
+    })
+
+
+
+
+  })
+
   
 
 

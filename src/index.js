@@ -10,7 +10,6 @@ function makeCallback(cb) {
   if (cb === undefined) {
     return rethrow();
   }
-
   if (typeof cb !== 'function') {
     throw new TypeError('callback must be a function');
   }
@@ -102,6 +101,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
       try{
+        this.stat = super.stat
         let res = await super.rm(...arguments)
         return resolve(callback(null,res))
       }catch(e){
