@@ -344,6 +344,74 @@ describe("Basic smoke tests", () => {
 
   })
 
+  test("unlink() - promises", async () => {
+    const fs = s3fs_promises(BUCKET)
+    try{
+      await fs.rm('test/not_there.json')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+    await fs.writeFile('test/aaa.txt','asdfsdf')
+    await fs.unlink('test/aaa.txt')
+
+    try{
+      await fs.stat('test/aaa.txt')
+    }catch(e){
+      expect(e.message).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+  
+  test("unlinkSync()", async () => {
+    const fs = s3fs(BUCKET)
+    try{
+      fs.unlinkSync('test/not_there.json')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    fs.unlinkSync('test/aaa.txt')
+
+    try{
+      await fs.statSync('test/aaa.txt')
+    }catch(e){
+      expect(e).toContain(`ENOENT: no such file or directory`)
+    }
+  })
+
+
+  test("unlink() - callback", async () => {
+    
+    const fs = s3fs(BUCKET)
+    await new Promise((resolve,reject)=>{
+      fs.unlink('test/not_there.txt', (error,data) =>{
+        expect(error.message).toContain(`ENOENT: no such file or directory`)
+        resolve()
+      })
+    })
+    fs.writeFileSync('test/aaa.txt','asdfsdf')
+    
+    await new Promise((resolve,reject)=>{
+      fs.unlink('test/aaa.txt',(error,data)=>{
+        expect(error).toEqual(null)
+        resolve()
+      })
+    })
+  })
+
+
+  test("unlinkSync(directory)", async () => {
+    const fs = s3fs(BUCKET)
+    fs.mkdirSync('/dir')
+
+    try{
+      fs.unlinkSync('/dir')
+    }catch(e){
+      expect(e).toContain(`EPERM: operation not permitted, unlink`)
+    }
+
+  })
+
 
   
   test("rmdir() - promises", async () => {

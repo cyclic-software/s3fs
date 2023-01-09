@@ -209,6 +209,36 @@ class CyclicS3FSPromises{
     }
   }
 
+  async unlink(path){
+    try{
+        let f = await Promise.allSettled([
+            this.stat(path),
+            this.readdir(path)
+        ])
+
+        if(f[0].status == 'rejected' && f[1].status == 'fulfilled'){
+            throw new Error(`EPERM: operation not permitted, unlink '${path}'`)
+        }
+        if(f[0].status == 'rejected' && f[1].status == 'rejected'){
+            throw f[0].reason
+        }
+
+    }catch(e){
+        throw e
+    }
+    path = util.normalize_path(path)
+    const cmd = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        throw e
+    }
+    
+  }
+
 }
 
 
