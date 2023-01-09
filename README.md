@@ -65,8 +65,3 @@ The supported methods have the same API as Node.js `fs`:
       const json = JSON.parse(await fs.readFile('test/_read.json'))
     }
   ```
-
-refer to fs, s3fs:
-
-- https://github.com/TooTallNate/s3fs
-- https://nodejs.org/docs/latest-v0.10.x/api/fs.html#fs_fs_mkdir_path_mode_callback
