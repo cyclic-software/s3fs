@@ -41,7 +41,6 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
 - [ ] fs.rmdir(path, callback)
 - [ ] fs.rm(path, callback)
 - [ ] fs.unlink(path, callback)
-- [ ] fs.lstat(path, callback)
 - [ ] fs.createReadStream(path, [options])
 - [ ] fs.createWriteStream(path, [options])
 

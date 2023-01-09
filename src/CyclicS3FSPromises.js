@@ -4,7 +4,8 @@ const {
   PutObjectCommand,
   HeadObjectCommand,
   ListObjectsCommand,
-  ListObjectsV2Command
+  ListObjectsV2Command,
+  DeleteObjectCommand
 } = require("@aws-sdk/client-s3");
 const _path = require('path')
 const {Stats} = require('fs')
@@ -68,9 +69,10 @@ class CyclicS3FSPromises{
   }
   
   async stat(fileName, data, options={}){
+    fileName = util.normalize_path(fileName)
     const cmd = new HeadObjectCommand({
         Bucket: this.bucket,
-        Key: util.normalize_path(fileName)
+        Key: fileName
     })
     let result;
     try{
@@ -121,7 +123,7 @@ class CyclicS3FSPromises{
 
   async readdir(path){
     path = util.normalize_dir(path)
-    const cmd = new ListObjectsCommand({
+    const cmd = new ListObjectsV2Command({
         Bucket: this.bucket,
         // StartAfter: path,
         Prefix: path,
@@ -152,6 +154,36 @@ class CyclicS3FSPromises{
     }
     return result
   }
+
+  async rm(path){
+    try{
+        let f = await this.stat(path)
+    }catch(e){
+        throw e
+    }
+    path = util.normalize_path(path)
+    const cmd = new DeleteObjectCommand({
+        Bucket: this.bucket,
+        Key: path
+    })
+    try{
+        await this.s3.send(cmd)
+    }catch(e){
+        console.error(e)
+    }
+    
+  }
+
+  
+//   async rmdir(path){
+//     path = util.normalize_dir(path)
+//     try{
+//         let await readdir(path)
+//         // await this.s3.send(cmd)
+//     }catch(e){
+//         throw e
+//     }
+//   }
 
 }
 
