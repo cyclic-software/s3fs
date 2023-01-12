@@ -24,7 +24,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
     super(bucketName, config={})
   }
 
-  
+
   readFile(fileName, options, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -36,7 +36,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   writeFile(fileName, data, options, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -48,7 +48,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   exists(fileName, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -72,7 +72,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   readdir(path, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -84,7 +84,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   mkdir(path, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -96,7 +96,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   rm(path, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -110,7 +110,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   unlink(path, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -124,7 +124,7 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
   rmdir(path, callback) {
     callback = makeCallback(arguments[arguments.length - 1]);
     new Promise(async (resolve,reject)=>{
@@ -138,12 +138,12 @@ class CyclicS3FS extends CyclicS3FSPromises {
       }
     })
   }
-  
+
 
   readFileSync(fileName) {
     return sync_interface.runSync(this,'readFile',[fileName])
   }
-  
+
   writeFileSync(fileName, data, options={}) {
     return sync_interface.runSync(this,'writeFile',[fileName, data, options])
   }
@@ -185,7 +185,6 @@ class CyclicS3FS extends CyclicS3FSPromises {
 
 }
 
-
 const client = function(bucketName, config={}){
     if(!process.env.AWS_SECRET_ACCESS_KEY){
       console.warn('[s3fs] WARNING: AWS credentials are not set. Using local file system')
@@ -195,3 +194,23 @@ const client = function(bucketName, config={}){
 }
 
 module.exports = client
+
+
+
+if (process.env.CYCLIC_BUCKET_NAME) {
+  let c = client(process.env.CYCLIC_BUCKET_NAME)
+
+  const allMethods =  ((obj) => {
+    let properties = new Set()
+    let currentObj = obj
+    do {
+      console.log(currentObj)
+      Object.getOwnPropertyNames(currentObj).map(item => properties.add(item))
+    } while ((currentObj = Object.getPrototypeOf(currentObj)) && Object.getPrototypeOf(currentObj))
+    return [...properties.keys()].filter(item => typeof obj[item] === 'function')
+  })(c)
+
+  allMethods.map((e) => {
+    module.exports[e] = c[e]
+  })
+}
