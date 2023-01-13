@@ -39,8 +39,6 @@ class CyclicS3FSPromises extends Function{
 
   _call(bucketName, config) {
     let client = new CyclicS3FSPromises(bucketName, config)
-    // client.s3 = new S3Client({...config})
-    // client.bucket = bucketName
     return client
   }
 
