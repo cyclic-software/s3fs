@@ -48,6 +48,7 @@ module.exports = {
     runSync,
 }
 const run = async function(bucket, config, method, args){
+    
     const fs = new CyclicS3FSPromises(bucket, config)
     let result = await fs[method](...args)
     if(typeof result !== 'undefined'){
@@ -62,6 +63,7 @@ if (require.main === module) {
 
     let _argv = process.argv.slice(2,)
     let bucket = _argv[0]
+    // console.error(process.argv)
     let config = JSON.parse(_argv[1])
     let method = _argv[2]
     var buf = '';

@@ -21,7 +21,19 @@ function makeCallback(cb) {
 
 class CyclicS3FS extends CyclicS3FSPromises {
   constructor(bucketName, config={}) {
-    super(bucketName, config={})
+    super()
+    if(process.env.CYCLIC_BUCKET_NAME){
+      this.bucket = process.env.CYCLIC_BUCKET_NAME
+    }
+    this.config = config
+    if(bucketName){
+      this.bucket = bucketName
+    }
+  }
+
+  _call(bucketName, config) {
+    let client = new CyclicS3FS(bucketName, config)
+    return client
   }
 
   
@@ -194,4 +206,7 @@ const client = function(bucketName, config={}){
     return new CyclicS3FS(bucketName, config)
 }
 
-module.exports = client
+
+
+
+module.exports = new CyclicS3FS()
