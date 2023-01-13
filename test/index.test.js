@@ -116,7 +116,7 @@ describe("Basic smoke tests", () => {
   test("readFileSync(jpeg)", async () => {
     const d = require("fs").readFileSync('test/_read.jpeg')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     const _d = fs.readFileSync('test/_read.jpeg')
 
     expect(Buffer.compare(d, _d)).toEqual(0)
@@ -127,7 +127,7 @@ describe("Basic smoke tests", () => {
       [Date.now()]: Date.now(),
     })
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     fs.writeFileSync('test/_write.json', content)
     let x = fs.readFileSync('test/_write.json')
 
@@ -137,7 +137,7 @@ describe("Basic smoke tests", () => {
   test("writeFileSync(big_text)", async () => {
     const big_text = require("fs").readFileSync('test/_read_big.txt')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     fs.writeFileSync('test/_write_big.txt', big_text)
     let x = fs.readFileSync('test/_write_big.txt')
 
@@ -147,7 +147,7 @@ describe("Basic smoke tests", () => {
   test("writeFileSync(jpeg)", async () => {
     const jpeg = require("fs").readFileSync('test/_read.jpeg')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     fs.writeFileSync('test/_write.jpeg', jpeg)
     let jpeg_s3 = fs.readFileSync('test/_write.jpeg')
 
