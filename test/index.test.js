@@ -7,7 +7,7 @@ const {
   } = require("@aws-sdk/client-s3");
 const s3 = new S3Client({});
 
-const s3fs = require("../src")
+const s3fs = require("../src") 
 const s3fs_promises = require("../src/promises")
 
 afterAll(async () => {
