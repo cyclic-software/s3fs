@@ -198,15 +198,24 @@ class CyclicS3FS extends CyclicS3FSPromises {
 }
 
 
-const client = function(bucketName, config={}){
-    if(!process.env.AWS_SECRET_ACCESS_KEY){
-      console.warn('[s3fs] WARNING: AWS credentials are not set. Using local file system')
-      return fs
+var client = new CyclicS3FS()
+class FSFallback extends Function{
+    constructor() {
+      super('...args', 'return this._bound._call(...args)')
+      this._bound = this.bind(this)
+      Object.assign(this._bound,{...fs})
+      return this._bound
     }
-    return new CyclicS3FS(bucketName, config)
+    _call() {
+        let client = new FSFallback()
+        return client
+    }
+}
+
+if(!process.env.AWS_SECRET_ACCESS_KEY){
+      console.warn('[s3fs] WARNING: AWS credentials are not set. Using local file system')
+      client =  new FSFallback()
 }
 
 
-
-
-module.exports = new CyclicS3FS()
+module.exports = client
