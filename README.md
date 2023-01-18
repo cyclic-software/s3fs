@@ -39,6 +39,16 @@ Require in the same format as Node.js `fs`, specifying an S3 Bucket:
   const fs = require('@cyclic.sh/s3fs/promises')(S3_BUCKET_NAME)
   ```
 
+- On cyclic.sh
+  -  Alternatively, when using with  <a href="https://cyclic.sh" target="_blank">cyclic.sh</a> or if the environment variable `CYCLIC_BUCKET_NAME` is set to an S3 bucket name, initialization can happen without specifying a bucket:
+      ```js
+      const fs = require('@cyclic.sh/s3fs') 
+      ```
+      or
+      ```js
+      const fs = require('@cyclic.sh/s3fs/promises') 
+      ```
+
 ### Authentication
 
 Authenticating the client:

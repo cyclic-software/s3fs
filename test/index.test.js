@@ -7,7 +7,7 @@ const {
   } = require("@aws-sdk/client-s3");
 const s3 = new S3Client({});
 
-const s3fs = require("../src")
+const s3fs = require("../src") 
 const s3fs_promises = require("../src/promises")
 
 afterAll(async () => {
@@ -116,7 +116,7 @@ describe("Basic smoke tests", () => {
   test("readFileSync(jpeg)", async () => {
     const d = require("fs").readFileSync('test/_read.jpeg')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     const _d = fs.readFileSync('test/_read.jpeg')
 
     expect(Buffer.compare(d, _d)).toEqual(0)
@@ -127,7 +127,7 @@ describe("Basic smoke tests", () => {
       [Date.now()]: Date.now(),
     })
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     fs.writeFileSync('test/_write.json', content)
     let x = fs.readFileSync('test/_write.json')
 
@@ -137,7 +137,7 @@ describe("Basic smoke tests", () => {
   test("writeFileSync(big_text)", async () => {
     const big_text = require("fs").readFileSync('test/_read_big.txt')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     fs.writeFileSync('test/_write_big.txt', big_text)
     let x = fs.readFileSync('test/_write_big.txt')
 
@@ -147,7 +147,7 @@ describe("Basic smoke tests", () => {
   test("writeFileSync(jpeg)", async () => {
     const jpeg = require("fs").readFileSync('test/_read.jpeg')
 
-    const fs = new s3fs(BUCKET)
+    const fs = s3fs(BUCKET)
     fs.writeFileSync('test/_write.jpeg', jpeg)
     let jpeg_s3 = fs.readFileSync('test/_write.jpeg')
 
@@ -509,6 +509,20 @@ describe("Basic smoke tests", () => {
 
   })
 
+
+  test("object mode / function mode", async () => {
+    let as_object = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src')))
+    let as_function = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src')(BUCKET)))
+    expect(as_function).toEqual(as_object)
+  })
+  
+  test("object mode / function mode - promises", async () => {
+    let as_object = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src/promises')))
+    let as_function = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src/promises')(BUCKET)))
+    expect(as_function).toEqual(as_object)
+  })
+
+
   test("empty_bucket", async () => {
     const fs = s3fs(BUCKET)
     let dir_name = `/nested/dir_${Date.now()}`
@@ -521,6 +535,8 @@ describe("Basic smoke tests", () => {
 
   })
 
+
+  
 
 
 

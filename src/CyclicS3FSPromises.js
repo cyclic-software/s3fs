@@ -22,11 +22,24 @@ function streamToBuffer(stream) {
   });
 }
 
-class CyclicS3FSPromises{
-  constructor(bucketName, config={}) {
-    this.bucket = bucketName
-    this.config = config
-    this.s3 = new S3Client({...config});
+class CyclicS3FSPromises extends Function{
+  constructor(bucket, config={}) {
+    super('...args', 'return this._bound._call(...args)')
+    this._bound = this.bind(this)
+    if(process.env.CYCLIC_BUCKET_NAME){
+      this._bound.bucket = process.env.CYCLIC_BUCKET_NAME
+    }
+    if(bucket){
+      this._bound.bucket = bucket
+    }
+    this._bound.s3 = new S3Client({...config});
+
+    return this._bound
+  }
+
+  _call(bucketName, config) {
+    let client = new CyclicS3FSPromises(bucketName, config)
+    return client
   }
 
   async readFile(fileName ,options){
