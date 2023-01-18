@@ -509,6 +509,20 @@ describe("Basic smoke tests", () => {
 
   })
 
+
+  test("object mode / function mode", async () => {
+    let as_object = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src')))
+    let as_function = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src')(BUCKET)))
+    expect(as_function).toEqual(as_object)
+  })
+  
+  test("object mode / function mode - promises", async () => {
+    let as_object = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src/promises')))
+    let as_function = Object.getOwnPropertyNames(Object.getPrototypeOf(require('../src/promises')(BUCKET)))
+    expect(as_function).toEqual(as_object)
+  })
+
+
   test("empty_bucket", async () => {
     const fs = s3fs(BUCKET)
     let dir_name = `/nested/dir_${Date.now()}`
@@ -521,6 +535,8 @@ describe("Basic smoke tests", () => {
 
   })
 
+
+  
 
 
 
