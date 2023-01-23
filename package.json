@@ -19,6 +19,10 @@
   "engines": {
     "node": ">=14.20.0"
   },
+  "exports":{
+    ".":"./src/index.js",
+    "./promises":"./src/promises.js"
+  },
   "repository": {
       "type": "git",
       "url": "git+https://github.com/cyclic-software/s3fs.git"
