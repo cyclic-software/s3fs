@@ -1,12 +1,14 @@
 const path = require('path')
 const normalize_path = function (p) {
-    p = path.normalize(p);
-    p = path.resolve(process.cwd(), p)
-    // p = path.relative(require.main.path, p)
-    p = p.replace(new RegExp(`^${path.sep}+`, 'g'), '');
-    // p = `${p}`
-    // p = `s3fs:${p}`
-    return p
+    p = p.split('\\').join('/')
+
+    let targetPath = p
+    if (targetPath[0] === '/') targetPath = targetPath.substr(1, targetPath.length - 1)
+
+    let lastChar = targetPath[targetPath.length - 1]
+    if (lastChar !== '/') targetPath += '/'
+
+    return targetPath
 }
 
 const normalize_dir = function(p){
